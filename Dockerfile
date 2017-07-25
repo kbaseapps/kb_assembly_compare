@@ -21,6 +21,27 @@ RUN pip install cffi --upgrade \
     && pip install requests --upgrade \
     && pip install 'requests[security]' --upgrade
 
+
+#### Install MUMmer4
+##
+RUN mkdir -p /kb/module
+WORKDIR /kb/module
+# YAGGO
+RUN curl -s https://codeload.github.com/gmarcais/yaggo/tar.gz/v1.5.10 > yaggo.v1.5.10.tar.gz && \
+    tar xfz yaggo.v1.5.10.tar.gz && \
+    cd yaggo-1.5.10 && \
+    make DEST=/usr/local/bin && \
+    cp ./yaggo /usr/local/bin
+# MUMmer4
+RUN git clone https://github.com/mummer4/mummer && \
+    cd mummer && \
+    autoreconf -fi && \
+    ./configure --prefix=/usr/local && \
+    make && \
+    make install && \
+    echo "MUMMER LOCATION: " && \ 
+    which mummer
+
 # -----------------------------------------
 
 COPY ./ /kb/module
