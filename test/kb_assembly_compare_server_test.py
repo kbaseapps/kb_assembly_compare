@@ -75,18 +75,12 @@ class kb_assembly_compareTest(unittest.TestCase):
     def getContext(self):
         return self.__class__.ctx
 
-    # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
-    def test_your_method(self):
-        # Prepare test objects in workspace if needed using
-        # self.getWsClient().save_objects({'workspace': self.getWsName(),
-        #                                  'objects': []})
-        #
-        # Run your method by
-        # ret = self.getImpl().your_method(self.getContext(), parameters...)
-        #
-        # Check returned data with
-        # self.assertEqual(ret[...], ...) or other unittest methods
-        pass
+
+    ##############
+    # UNIT TESTS #
+    ##############
+
+
     # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
     def test_run_benchmark_assemblies_against_genomes_with_MUMmer4_test_01 (self):
         # Prepare test objects in workspace if needed using
@@ -111,9 +105,16 @@ class kb_assembly_compareTest(unittest.TestCase):
         sister_genome_ref_1 = reference_prok_genomes_WS+'/GCF_000357445.2/1'  # Escherichia coli P0298942.3 (207 contigs)
         sister_genome_ref_2 = reference_prok_genomes_WS+'/GCF_000195755.1/1'  # DvH (2 contigs)
         sister_genome_ref_3 = reference_prok_genomes_WS+'/GCF_000069025.1/1'  # Halobacterium salinarum R1 (5 contigs)
-        sister_assembly_ref_1 = reference_prok_genomes_WS+'/442/1'
-        sister_assembly_ref_2 = reference_prok_genomes_WS+'/48316/1'
-        sister_assembly_ref_3 = reference_prok_genomes_WS+'/194909/1'
+
+        # PROD refs
+        #sister_assembly_ref_1 = reference_prok_genomes_WS+'/442/1'
+        #sister_assembly_ref_2 = reference_prok_genomes_WS+'/48316/1'
+        #sister_assembly_ref_3 = reference_prok_genomes_WS+'/194909/1'
+
+        # CI refs
+        sister_assembly_ref_1 = reference_prok_genomes_WS+'/29930/1'
+        sister_assembly_ref_2 = reference_prok_genomes_WS+'/62326/1'
+        sister_assembly_ref_3 = reference_prok_genomes_WS+'/114529/1'
 
         parameters = { 'workspace_name': self.getWsName(),
                        'desc': 'test assembly benchmark',
