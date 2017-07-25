@@ -51,9 +51,17 @@ class kb_assembly_compare:
     GIT_COMMIT_HASH = ""
 
     #BEGIN_CLASS_HEADER
-    workspaceURL = None
-    MUMMER = '/usr/local/bin/mummer'
+    workspaceURL     = None
+    shockURL         = None
+    handleURL        = None
+    serviceWizardURL = None
+    callbackURL      = None
+    scratch          = None
 
+    # wrapped program(s)
+    MUMMER_bin = '/usr/local/bin/mummer'
+
+    # log
     def log(self, target, message):
         timestamp = str(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3])
         if target is not None:
@@ -70,7 +78,7 @@ class kb_assembly_compare:
         self.workspaceURL = config['workspace-url']
         self.shockURL = config['shock-url']
         self.handleURL = config['handle-service-url']
-        self.serviceWizardURL = config['service-wizard-url']
+        self.serviceWizardURL = config['srv-wiz-url']
         self.callbackURL = os.environ['SDK_CALLBACK_URL']
         self.scratch = os.path.abspath(config['scratch'])
 
@@ -142,7 +150,7 @@ class kb_assembly_compare:
             raise ValueError('Unable to instantiate auClient with callbackURL: '+ self.callbackURL +' ERROR: ' + str(e))
         # dfuClient
         try:
-            dfu_Client = DFUClient(self.callbackURL)
+            dfuClient = DFUClient(self.callbackURL)
         except Exception as e:
             raise ValueError('Unable to instantiate dfu_Client with callbackURL: '+ self.callbackURL +' ERROR: ' + str(e))
 
@@ -242,7 +250,7 @@ class kb_assembly_compare:
                     genome_obj = objects[0]['data']
                     genome_obj_info = objects[0]['info']
                     genome_obj_names.append(genome_obj_info[NAME_I])
-                    genome_sci_names.append(genome_obj_data['scientific_name'])
+                    genome_sci_names.append(genome_obj['scientific_name'])
                 except:
                     raise ValueError ("unable to fetch genome: "+input_ref)
 
@@ -264,20 +272,21 @@ class kb_assembly_compare:
 
         # get fastas for scaffolds
         if len(invalid_msgs) == 0:
-            genomes_outdir = os.path.join (output_dir, 'benchmark_genomes')
-            if not os.path.exists(genomes_outdir):
-                os.makedirs(genomes_outdir)
+            #genomes_outdir = os.path.join (output_dir, 'benchmark_genomes')
+            #if not os.path.exists(genomes_outdir):
+            #    os.makedirs(genomes_outdir)
             read_buf_size  = 65536
             write_buf_size = 65536
             benchmark_assembly_file_paths = []
 
             for genome_i,input_ref in enumerate(genome_refs):
-                contig_file = auClient.get_assembly_as_fasta({'ref':assembly_refs[genome_i]}).get('path')
+                contig_file = auClient.get_assembly_as_fasta({'ref':genome_assembly_refs[genome_i]}).get('path')
                 sys.stdout.flush()
                 contig_file_path = dfuClient.unpack_file({'file_path': contig_file})['file_path']
-                clean_genome_ref = genome_ref.replace('/','_')
-                genome_outfile_path = os.join(benchmark_outdir, clean_genome_ref+".fna")
-                shutil.move(contig_file_path, genome_outfile_path)
+                benchmark_assembly_file_paths.append(contig_file_path)
+                #clean_genome_ref = genome_ref.replace('/','_')
+                #genome_outfile_path = os.join(benchmark_outdir, clean_genome_ref+".fna")
+                #shutil.move(contig_file_path, genome_outfile_path)
 
 
         #### STEP 3: get assembly refs
@@ -290,11 +299,15 @@ class kb_assembly_compare:
             assembly_refs_seen = dict()
         
             for i,input_ref in enumerate(params['input_assembly_refs']):
-                # genome obj info
+                # assembly obj info
                 try:
                     [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = range(11)  # object_info tuple
                     input_obj_info = wsClient.get_object_info_new ({'objects':[{'ref':input_ref}]})[0]
                     input_obj_type = re.sub ('-[0-9]+\.[0-9]+$', "", input_obj_info[TYPE_I])  # remove trailing version
+
+                    # DEBUG
+                    input_obj_name = input_obj_info[NAME_I]
+                    self.log (console, "GETTING ASSEMBLY: "+str(input_ref)+" "+str(input_obj_name))
 
                 except Exception as e:
                     raise ValueError('Unable to get object from workspace: (' + input_ref +')' + str(e))
@@ -331,9 +344,9 @@ class kb_assembly_compare:
         #### STEP 4: Get assemblies to score as fasta files
         ##
         if len(invalid_msgs) == 0:
-            assembly_outdir = os.path.join (output_dir, 'score_assembly')
-            if not os.path.exists(assembly_outdir):
-                os.makedirs(assembly_outdir)
+            #assembly_outdir = os.path.join (output_dir, 'score_assembly')
+            #if not os.path.exists(assembly_outdir):
+            #    os.makedirs(assembly_outdir)
             read_buf_size  = 65536
             write_buf_size = 65536
             score_assembly_file_paths = []
@@ -342,9 +355,10 @@ class kb_assembly_compare:
                 contig_file = auClient.get_assembly_as_fasta({'ref':assembly_refs[ass_i]}).get('path')
                 sys.stdout.flush()
                 contig_file_path = dfuClient.unpack_file({'file_path': contig_file})['file_path']
-                clean_ass_ref = assembly_ref.replace('/','_')
-                assembly_outfile_path = os.join(assembly_outdir, clean_assembly_ref+".fna")
-                shutil.move(contig_file_path, assembly_outfile_path)
+                score_assembly_file_paths.append(contig_file_path)
+                #clean_ass_ref = assembly_ref.replace('/','_')
+                #assembly_outfile_path = os.join(assembly_outdir, clean_assembly_ref+".fna")
+                #shutil.move(contig_file_path, assembly_outfile_path)
 
 
 
@@ -354,7 +368,7 @@ class kb_assembly_compare:
         # HERE
         if len(invalid_msgs) == 0:
             cmd = []
-            cmd.append (self.MUMMER)
+            cmd.append (self.MUMMER_bin)
 #            # output
 #            cmd.append ('-base_name')
 #            cmd.append (params['output_name'])
