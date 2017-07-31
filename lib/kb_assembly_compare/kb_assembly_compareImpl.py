@@ -184,6 +184,7 @@ class kb_assembly_compare:
             assembly_obj_types = ["KBaseGenomeAnnotations.Assembly", "KBaseGenomes.ContigSet"]
             accepted_input_types = [set_obj_type] + assembly_obj_types
             assembly_refs = []
+            assembly_names = []
             assembly_refs_seen = dict()
         
             for i,input_ref in enumerate(params['input_assembly_refs']):
@@ -192,10 +193,9 @@ class kb_assembly_compare:
                     [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = range(11)  # object_info tuple
                     input_obj_info = wsClient.get_object_info_new ({'objects':[{'ref':input_ref}]})[0]
                     input_obj_type = re.sub ('-[0-9]+\.[0-9]+$', "", input_obj_info[TYPE_I])  # remove trailing version
-
-                    # DEBUG
                     input_obj_name = input_obj_info[NAME_I]
-                    self.log (console, "GETTING ASSEMBLY: "+str(input_ref)+" "+str(input_obj_name))
+
+                    self.log (console, "GETTING ASSEMBLY: "+str(input_ref)+" "+str(input_obj_name))  # DEBUG
 
                 except Exception as e:
                     raise ValueError('Unable to get object from workspace: (' + input_ref +')' + str(e))
@@ -210,6 +210,7 @@ class kb_assembly_compare:
                     except:
                         assembly_refs_seen[input_ref] = True
                         assembly_refs.append(input_ref)
+                        assembly_names.append(input_obj_name)
                 elif input_obj_type != set_obj_type:
                     raise ValueError ("bad obj type for input_ref: "+input_ref)
                 else:  # add assembly set members
@@ -227,19 +228,29 @@ class kb_assembly_compare:
                         except:
                             assembly_refs_seen[this_assembly_ref] = True
                             assembly_refs.append(this_assembly_ref)
+                            try:
+                                [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = range(11)  # object_info tuple
+                                this_input_obj_info = wsClient.get_object_info_new ({'objects':[{'ref':this_assembly_ref}]})[0]
+                                this_input_obj_type = re.sub ('-[0-9]+\.[0-9]+$', "", input_obj_info[TYPE_I])  # remove trailing version
+                                this_input_obj_name = input_obj_info[NAME_I]
+                            
+                                assembly_names.append(this_input_obj_name)
+                            except Exception as e:
+                                raise ValueError('Unable to get object from workspace: (' + this_assembly_ref +')' + str(e))
 
 
         #### STEP 2: Get assemblies to score as fasta files
         ##
         if len(invalid_msgs) == 0:
+            self.log (console, "Retrieving Assemblies")  # DEBUG
+
             #assembly_outdir = os.path.join (output_dir, 'score_assembly')
             #if not os.path.exists(assembly_outdir):
             #    os.makedirs(assembly_outdir)
-            read_buf_size  = 65536
-            write_buf_size = 65536
             score_assembly_file_paths = []
 
             for ass_i,input_ref in enumerate(assembly_refs):
+                self.log (console, "\tAssembly: "+assembly_names[ass_i]+" ("+assembly_refs[ass_i]+")")  # DEBUG
                 contig_file = auClient.get_assembly_as_fasta({'ref':assembly_refs[ass_i]}).get('path')
                 sys.stdout.flush()
                 contig_file_path = dfuClient.unpack_file({'file_path': contig_file})['file_path']
@@ -249,13 +260,86 @@ class kb_assembly_compare:
                 #shutil.move(contig_file_path, assembly_outfile_path)
 
 
-
         #### STEP 3: Get distributions of contig attributes
         ##
         if len(invalid_msgs) == 0:
-            
 
-            
+            # score fasta lens in contig files
+            read_buf_size  = 65536
+            #write_buf_size = 65536
+
+            max_len = 0
+            lens = []
+            for ass_i,assembly_file_path in enumerate(score_assembly_file_paths):
+                ass_name = assembly_names[ass_i]
+                self.log (console, "Reading contig lengths in assembly: "+ass_name)  # DEBUG
+
+                lens.append([])
+                with open (assembly_file_path, 'r', read_buf_size) as ass_handle:
+                    seq_buf = ''
+                    for fasta_line in ass_handle:
+                        if fasta_line.startswith('>'):
+                            if seq_buf != '':
+                                seq_len = len(seq_buf)
+                                if seq_len > max_len:
+                                    max_len = seq_len
+                                lens[ass_i].append(seq_len)
+                                seq_buf = ''
+                        else:
+                            seq_buf += ''.join(fasta_line.split())
+                    if seq_buf != '':
+                        seq_len = len(seq_buf)
+                        if seq_len > max_len:
+                            max_len = seq_len
+                        lens[ass_i].append(seq_len)
+                        seq_buf = ''
+
+            # count buckets and develop histogram
+            hist_window_width = 10000  # make it log scale?
+            N_hist_windows = int(max_len % hist_window_width)  
+            len_buckets = [ 1000000, 500000, 100000, 50000, 10000, 5000, 1000, 500, 0 ]
+            summary_stats = []
+            hist = []
+            for ass_i,ass_name in enumerate(assembly_names):
+                self.log (console, "Building summary and histograms from assembly: "+ass_name)  # DEBUG
+                lens[ass_i].sort(key=int, reverse=True)
+
+                # summary stats
+                summary_stats.append(dict())
+                for bucket in len_buckets:
+                    summary_stats[ass_i][bucket] = 0
+                    for val in lens[ass_i]:
+                        if val >= bucket:
+                            summary_stats[ass_i][bucket] += 1
+                        else:
+                            break
+
+                # histogram
+                hist.append([])
+                for hist_i in range(N_hist_windows):
+                    hist[ass_i].append(0)
+                for val in lens[ass_i]:
+                    hist_i = int(val / hist_window_width)
+                    hist[ass_i][hist_i] += 1
+
+            # determine max height across histograms
+            max_hist_height = 0
+            for ass_i,ass_name in enumerate(assembly_names):
+                for hist_val in hist[ass_i]:
+                    if hist_val > max_hist_height:
+                        max_hist_height = hist_val
+
+
+        #### STEP 4: build text report
+        ##
+        if len(invalid_msgs) == 0:
+            for ass_i,ass_name in enumerate(assembly_names):
+                report_text += "ASSEMBLY STATS for "+ass_name+"\n"
+                for bucket in len_buckets:
+                    report_text += "\t"+"Ncontigs >= "+str(bucket)+"bp:\t"+str(summary_stats[ass_i][bucket])+"\n"
+                report_text += "\n"
+        self.log(console, report_text)  # DEBUG
+
 
         #### STEP 5: Build report
         ##
@@ -276,8 +360,8 @@ class kb_assembly_compare:
             report_text = "\n".join(invalid_msgs)
         reportObj['message'] = report_text
 
-        #if len(invalid_msgs) == 0:
-            
+        if len(invalid_msgs) == 0:
+            pass
             # html report
             """
             try:
