@@ -47,8 +47,8 @@ class kb_assembly_compare:
     # the latter method is running.
     ######################################### noqa
     VERSION = "0.0.1"
-    GIT_URL = ""
-    GIT_COMMIT_HASH = ""
+    GIT_URL = "https://github.com/dcchivian/kb_assembly_compare"
+    GIT_COMMIT_HASH = "751d420f0c2e542922983f91387e8536bd4bb373"
 
     #BEGIN_CLASS_HEADER
     workspaceURL     = None
@@ -60,6 +60,7 @@ class kb_assembly_compare:
 
     # wrapped program(s)
     MUMMER_bin = '/usr/local/bin/mummer'
+    NUCMER_bin = '/usr/local/bin/nucmer'
 
     # log
     def log(self, target, message):
@@ -89,6 +90,227 @@ class kb_assembly_compare:
         #END_CONSTRUCTOR
         pass
 
+
+    def run_contig_distribution_compare(self, ctx, params):
+        """
+        :param params: instance of type "Contig_Distribution_Compare_Params"
+           (contig_distribution_compare() ** **  Compare Assembly Contig
+           Length Distributions) -> structure: parameter "workspace_name" of
+           type "workspace_name" (** The workspace object refs are of form:
+           ** **    objects = ws.get_objects([{'ref':
+           params['workspace_id']+'/'+params['obj_name']}]) ** ** "ref" means
+           the entire name combining the workspace id and the object name **
+           "id" is a numerical identifier of the workspace or object, and
+           should just be used for workspace ** "name" is a string identifier
+           of a workspace or object.  This is received from Narrative.),
+           parameter "input_assembly_refs" of type "data_obj_ref"
+        :returns: instance of type "Contig_Distribution_Compare_Output" ->
+           structure: parameter "report_name" of type "data_obj_name",
+           parameter "report_ref" of type "data_obj_ref"
+        """
+        # ctx is the context object
+        # return variables are: returnVal
+        #BEGIN run_contig_distribution_compare
+
+        #### STEP 0: basic init
+        ##
+        console = []
+        invalid_msgs = []
+        report_text = ''
+        self.log(console, 'Running run_contig_distribution_compare(): ')
+        self.log(console, "\n"+pformat(params))
+
+        # Auth
+        token = ctx['token']
+        headers = {'Authorization': 'OAuth '+token}
+        env = os.environ.copy()
+        env['KB_AUTH_TOKEN'] = token
+
+        # API Clients
+        #SERVICE_VER = 'dev'  # DEBUG
+        SERVICE_VER = 'release'
+        # wsClient
+        try:
+            wsClient = workspaceService(self.workspaceURL, token=token)
+        except Exception as e:
+            raise ValueError('Unable to instantiate wsClient with workspaceURL: '+ self.workspaceURL +' ERROR: ' + str(e))
+        # setAPI_Client
+        try:
+            #setAPI_Client = SetAPI (url=self.callbackURL, token=ctx['token'])  # for SDK local.  local doesn't work for SetAPI
+            setAPI_Client = SetAPI (url=self.serviceWizardURL, token=ctx['token'])  # for dynamic service
+        except Exception as e:
+            raise ValueError('Unable to instantiate setAPI_Client with serviceWizardURL: '+ self.serviceWizardURL +' ERROR: ' + str(e))
+        # auClient
+        try:
+            auClient = AssemblyUtil(self.callbackURL, token=ctx['token'], service_ver=SERVICE_VER)
+        except Exception as e:
+            raise ValueError('Unable to instantiate auClient with callbackURL: '+ self.callbackURL +' ERROR: ' + str(e))
+        # dfuClient
+        try:
+            dfuClient = DFUClient(self.callbackURL)
+        except Exception as e:
+            raise ValueError('Unable to instantiate dfu_Client with callbackURL: '+ self.callbackURL +' ERROR: ' + str(e))
+
+        # param checks
+        required_params = ['workspace_name',
+                           'input_assembly_refs'
+                          ]
+        for arg in required_params:
+            if arg not in params or params[arg] == None or params[arg] == '':
+                raise ValueError ("Must define required param: '"+arg+"'")
+
+        # load provenance
+        provenance = [{}]
+        if 'provenance' in ctx:
+            provenance = ctx['provenance']
+        provenance[0]['input_ws_objects']=[]
+        for input_ref in params['input_assembly_refs']:
+            provenance[0]['input_ws_objects'].append(input_ref)
+
+        # set the output paths
+        timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
+        output_dir = os.path.join(self.scratch,'output.'+str(timestamp))
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        html_output_dir = os.path.join(output_dir,'html')
+        if not os.path.exists(html_output_dir):
+            os.makedirs(html_output_dir)
+
+
+        #### STEP 1: get assembly refs
+        ##
+        if len(invalid_msgs) == 0:
+            set_obj_type = "KBaseSets.AssemblySet"
+            assembly_obj_types = ["KBaseGenomeAnnotations.Assembly", "KBaseGenomes.ContigSet"]
+            accepted_input_types = [set_obj_type] + assembly_obj_types
+            assembly_refs = []
+            assembly_refs_seen = dict()
+        
+            for i,input_ref in enumerate(params['input_assembly_refs']):
+                # assembly obj info
+                try:
+                    [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = range(11)  # object_info tuple
+                    input_obj_info = wsClient.get_object_info_new ({'objects':[{'ref':input_ref}]})[0]
+                    input_obj_type = re.sub ('-[0-9]+\.[0-9]+$', "", input_obj_info[TYPE_I])  # remove trailing version
+
+                    # DEBUG
+                    input_obj_name = input_obj_info[NAME_I]
+                    self.log (console, "GETTING ASSEMBLY: "+str(input_ref)+" "+str(input_obj_name))
+
+                except Exception as e:
+                    raise ValueError('Unable to get object from workspace: (' + input_ref +')' + str(e))
+                if input_obj_type not in accepted_input_types:
+                    raise ValueError ("Input object of type '"+input_obj_type+"' not accepted.  Must be one of "+", ".join(accepted_input_types))
+
+                # add members to assembly_ref list
+                if input_obj_type in assembly_obj_types:
+                    try:
+                        assembly_seen = assembly_refs_seen[input_ref]
+                        continue
+                    except:
+                        assembly_refs_seen[input_ref] = True
+                        assembly_refs.append(input_ref)
+                elif input_obj_type != set_obj_type:
+                    raise ValueError ("bad obj type for input_ref: "+input_ref)
+                else:  # add assembly set members
+
+                    try:
+                        assemblySet_obj = setAPI_Client.get_assembly_set_v1 ({'ref':input_ref, 'include_item_info':1})
+                    except Exception as e:
+                        raise ValueError('Unable to get object from workspace: (' + input_ref +')' + str(e))
+                    
+                    for assembly_obj in assemblySet_obj['data']['items']:
+                        this_assembly_ref = assembly_obj['ref']
+                        try:
+                            assembly_seen = assembly_refs_seen[this_assembly_ref]
+                            continue
+                        except:
+                            assembly_refs_seen[this_assembly_ref] = True
+                            assembly_refs.append(this_assembly_ref)
+
+
+        #### STEP 2: Get assemblies to score as fasta files
+        ##
+        if len(invalid_msgs) == 0:
+            #assembly_outdir = os.path.join (output_dir, 'score_assembly')
+            #if not os.path.exists(assembly_outdir):
+            #    os.makedirs(assembly_outdir)
+            read_buf_size  = 65536
+            write_buf_size = 65536
+            score_assembly_file_paths = []
+
+            for ass_i,input_ref in enumerate(assembly_refs):
+                contig_file = auClient.get_assembly_as_fasta({'ref':assembly_refs[ass_i]}).get('path')
+                sys.stdout.flush()
+                contig_file_path = dfuClient.unpack_file({'file_path': contig_file})['file_path']
+                score_assembly_file_paths.append(contig_file_path)
+                #clean_ass_ref = assembly_ref.replace('/','_')
+                #assembly_outfile_path = os.join(assembly_outdir, clean_assembly_ref+".fna")
+                #shutil.move(contig_file_path, assembly_outfile_path)
+
+
+
+        #### STEP 3: Get distributions of contig attributes
+        ##
+        if len(invalid_msgs) == 0:
+            
+
+            
+
+        #### STEP 5: Build report
+        ##
+        reportName = 'run_contig_distribution_compare_report_'+str(uuid.uuid4())
+        reportObj = {'objects_created': [],
+                     #'text_message': '',  # or is it 'message'?
+                     'message': '',  # or is it 'text_message'?
+                     'direct_html': '',
+                     #'direct_html_link_index': 0,
+                     'file_links': [],
+                     'html_links': [],
+                     'workspace_name': params['workspace_name'],
+                     'report_object_name': reportName
+                     }
+
+        # message
+        if len(invalid_msgs) > 0:
+            report_text = "\n".join(invalid_msgs)
+        reportObj['message'] = report_text
+
+        #if len(invalid_msgs) == 0:
+            
+            # html report
+            """
+            try:
+                html_upload_ret = dfuClient.file_to_shock({'file_path': html_output_dir,
+                                                     'make_handle': 0,
+                                                     'pack': 'zip'})
+            except:
+                raise ValueError ('error uploading html report to shock')
+            reportObj['direct_html_link_index'] = 0
+            reportObj['html_links'] = [{'shock_id': html_upload_ret['shock_id'],
+                                        'name': html_file,
+                                        'label': params['output_name']+' HTML'
+                                    }
+                                   ]
+            """
+
+
+        # save report object
+        #
+        SERVICE_VER = 'release'
+        reportClient = KBaseReport(self.callbackURL, token=ctx['token'], service_ver=SERVICE_VER)
+        #report_info = report.create({'report':reportObj, 'workspace_name':params['workspace_name']})
+        report_info = reportClient.create_extended_report(reportObj)
+
+        returnVal = { 'report_name': report_info['name'], 'report_ref': report_info['ref'] }
+        #END run_contig_distribution_compare
+
+        # At some point might do deeper type checking...
+        if not isinstance(returnVal, dict):
+            raise ValueError('Method run_contig_distribution_compare return value ' +
+                             'returnVal is not type dict as required.')
+        # return the results
+        return [returnVal]
 
     def run_benchmark_assemblies_against_genomes_with_MUMmer4(self, ctx, params):
         """
@@ -364,11 +586,9 @@ class kb_assembly_compare:
 
         #### STEP 5: Run MUMmer
         ##
-
-        # HERE
         if len(invalid_msgs) == 0:
             cmd = []
-            cmd.append (self.MUMMER_bin)
+            cmd.append (self.NUCMER_bin)
 #            # output
 #            cmd.append ('-base_name')
 #            cmd.append (params['output_name'])

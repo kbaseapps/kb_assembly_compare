@@ -33,14 +33,14 @@ RUN curl -s https://codeload.github.com/gmarcais/yaggo/tar.gz/v1.5.10 > yaggo.v1
     make DEST=/usr/local/bin && \
     cp ./yaggo /usr/local/bin
 # MUMmer4
-RUN git clone https://github.com/mummer4/mummer && \
-    cd mummer && \
-    autoreconf -fi && \
-    ./configure --prefix=/usr/local && \
-    make && \
-    make install && \
-    echo "MUMMER LOCATION: " && \ 
-    which mummer
+#RUN git clone https://github.com/mummer4/mummer && \
+#    cd mummer && \
+##    mkdir aux_bin && \
+##    make check && \
+#    make install CPPFLAGS="-O3 -DSIXTYFOURBITS"
+##    mummerpath=`pwd` && \
+##    cd .. && \
+##    export PATH=$mergerpath:$mummerpath:$PATH
 
 # -----------------------------------------
 

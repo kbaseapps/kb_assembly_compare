@@ -33,6 +33,27 @@ class kb_assembly_compare(object):
             trust_all_ssl_certificates=trust_all_ssl_certificates,
             auth_svc=auth_svc)
 
+    def run_contig_distribution_compare(self, params, context=None):
+        """
+        :param params: instance of type "Contig_Distribution_Compare_Params"
+           (contig_distribution_compare() ** **  Compare Assembly Contig
+           Length Distributions) -> structure: parameter "workspace_name" of
+           type "workspace_name" (** The workspace object refs are of form:
+           ** **    objects = ws.get_objects([{'ref':
+           params['workspace_id']+'/'+params['obj_name']}]) ** ** "ref" means
+           the entire name combining the workspace id and the object name **
+           "id" is a numerical identifier of the workspace or object, and
+           should just be used for workspace ** "name" is a string identifier
+           of a workspace or object.  This is received from Narrative.),
+           parameter "input_assembly_refs" of type "data_obj_ref"
+        :returns: instance of type "Contig_Distribution_Compare_Output" ->
+           structure: parameter "report_name" of type "data_obj_name",
+           parameter "report_ref" of type "data_obj_ref"
+        """
+        return self._client.call_method(
+            'kb_assembly_compare.run_contig_distribution_compare',
+            [params], self._service_ver, context)
+
     def run_benchmark_assemblies_against_genomes_with_MUMmer4(self, params, context=None):
         """
         :param params: instance of type
