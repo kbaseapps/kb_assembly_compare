@@ -289,20 +289,80 @@ class kb_assembly_compare:
                         lens[ass_i].append(seq_len)
                         seq_buf = ''
 
-            # sort lens
+            # sort lens (absolutely critical to subsequent steps)
+            for ass_i,ass_name in enumerate(assembly_names):
+                self.log (console, "Sorting contig lens for "+ass_name)  # DEBUG
+                lens[ass_i].sort(key=int, reverse=True)  # sorting is critical
+
+            # get max_lens for each assembly and overall max_len
             max_len = 0
             max_lens = []
             for ass_i,ass_name in enumerate(assembly_names):
-                self.log (console, "Building summary and histograms from assembly: "+ass_name)  # DEBUG
-                lens[ass_i].sort(key=int, reverse=True)  # sorting is critical
-                max_lens.append(lens[ass_i][0])
-                if lens[ass_i][0] > max_len:
-                    max_len = lens[ass_i][0]
+                self.log (console, "Getting max lens "+ass_name)  # DEBUG
+                this_max_len = lens[ass_i][0]
+                max_lens.append(this_max_len)
+                if this_max_len > max_len:
+                    max_len = this_max_len
+
+            # Sum cumulative plot data
+            total_lens = []
+            cumulative_lens = []
+            for ass_i,ass_name in enumerate(assembly_names):
+                self.log (console, "Summing cumulative lens for "+ass_name)  # DEBUG
+                total_lens.append(0)
+                cumulative_lens.append([])
+                for val in lens[ass_i]:
+                    cumulative_lens[ass_i].append(total_lens[ass_i]+val)
+                    total_lens[ass_i] += val
+
+            """
+            # DEBUG
+            self.log (console, "SORTED VALS\n================================")
+            for ass_i,ass_name in enumerate(assembly_names):
+                self.log (console, ass_name)
+                self.log (console, "\t\t"+"TOTAL_LEN: "+str(total_lens[ass_i]))
+                for val_i,val in enumerate(lens[ass_i]):
+                    self.log (console, "\t\t\t"+"VAL: "+str(val))
+                for len_i,length in enumerate(cumulative_lens[ass_i]):
+                    self.log (console, "\t\t\t"+"LEN: "+str(length))
+            # END DEBUG
+            """
+
+            # get N50 and L50 (and 75s, and 90s)
+            N = { 50: [],
+                  75: [],
+                  90: []
+              }
+            L = { 50: [],
+                  75: [],
+                  90: []
+              }
+            for perc in N.keys():
+                frac = perc/100.0
+                for ass_i,ass_name in enumerate(assembly_names):
+                    self.log (console, "Getting N/L"+str(perc)+" for "+ass_name)  # DEBUG
+                    for val_i,val in enumerate(lens[ass_i]):
+                        if cumulative_lens[ass_i][val_i] >= frac * total_lens[ass_i]:
+                            N[perc].append(val)
+                            L[perc].append(val_i+1)
+                            break
+
+            """
+            # DEBUG
+            self.log (console, "N50, etc.\n================================")
+            for ass_i,ass_name in enumerate(assembly_names):
+                self.log (console, ass_name)
+                for perc in N.keys():
+                    self.log (console, "\t"+"N"+str(perc)+": "+str(N[perc][ass_i]))
+                    self.log (console, "\t"+"L"+str(perc)+": "+str(L[perc][ass_i]))
+            # END DEBUG
+            """
 
             # count buckets and develop histogram
             hist_window_width = 10000  # make it log scale?
             N_hist_windows = int(max_len % hist_window_width)  
-            len_buckets = [ 1000000, 500000, 100000, 50000, 10000, 5000, 1000, 500, 0 ]
+            #len_buckets = [ 1000000, 500000, 100000, 50000, 10000, 5000, 1000, 500, 0 ]
+            len_buckets = [ 1000000, 100000, 10000, 1000, 500, 0 ]
             summary_stats = []
             cumulative_len_stats = []
             hist = []
@@ -351,6 +411,9 @@ class kb_assembly_compare:
                 report_text += "ASSEMBLY STATS for "+ass_name+"\n"
 
                 report_text += "\t"+"L longest contig:\t"+str(max_lens[ass_i])+" bp"+"\n"
+                for perc in N.keys():
+                    report_text += "\t"+"N"+str(perc)+":\t"+str(N[perc][ass_i])+"\n"
+                    report_text += "\t"+"L"+str(perc)+":\t"+str(L[perc][ass_i])+"\n"
                 for bucket in len_buckets:
                     report_text += "\t"+"Ncontigs >= "+str(bucket)+" bp:\t"+str(summary_stats[ass_i][bucket])+"\n"
                 report_text += "\n"
