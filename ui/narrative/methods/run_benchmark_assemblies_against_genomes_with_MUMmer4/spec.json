@@ -5,7 +5,7 @@
     ],
     "contact": "help@kbase.us",
     "visible": true,
-    "categories": ["active","util","assembly","communities"],
+    "categories": ["inactive","util","assembly","communities"],
     "widgets": {
         "input": null,
         "output": "no-display"
