@@ -22,6 +22,24 @@ module kb_assembly_compare {
     typedef int    bool;
 
 
+    /* contig_distribution_compare()
+    **
+    **  Compare Assembly Contig Length Distributions
+    */
+    typedef structure {
+        workspace_name workspace_name;
+	data_obj_ref   input_assembly_refs;   /* Assemblies or AssemblySets */
+        /*data_obj_name  output_name;*/
+    } Contig_Distribution_Compare_Params;
+
+    typedef structure {
+	data_obj_name report_name;
+	data_obj_ref  report_ref;
+    } Contig_Distribution_Compare_Output;
+
+    funcdef run_contig_distribution_compare (Contig_Distribution_Compare_Params params)  returns (Contig_Distribution_Compare_Output) authentication required;
+
+
     /* benchmark_assemblies_against_genomes_with_MUMmer4()
     **
     **  Align benchmark genomes to assembly contigs

@@ -165,6 +165,23 @@ public class KbAssemblyCompareClient {
     }
 
     /**
+     * <p>Original spec-file function name: run_contig_distribution_compare</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.kbassemblycompare.ContigDistributionCompareParams ContigDistributionCompareParams} (original type "Contig_Distribution_Compare_Params")
+     * @return   instance of type {@link us.kbase.kbassemblycompare.ContigDistributionCompareOutput ContigDistributionCompareOutput} (original type "Contig_Distribution_Compare_Output")
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public ContigDistributionCompareOutput runContigDistributionCompare(ContigDistributionCompareParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<ContigDistributionCompareOutput>> retType = new TypeReference<List<ContigDistributionCompareOutput>>() {};
+        List<ContigDistributionCompareOutput> res = caller.jsonrpcCall("kb_assembly_compare.run_contig_distribution_compare", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        return res.get(0);
+    }
+
+    /**
      * <p>Original spec-file function name: run_benchmark_assemblies_against_genomes_with_MUMmer4</p>
      * <pre>
      * </pre>
