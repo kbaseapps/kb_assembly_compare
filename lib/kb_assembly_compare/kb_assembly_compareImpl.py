@@ -310,6 +310,7 @@ class kb_assembly_compare:
                     max_len = this_max_len
 
             # Sum cumulative plot data
+            max_total = 0
             total_lens = []
             cumulative_lens = []
             for ass_i,ass_name in enumerate(assembly_names):
@@ -319,7 +320,10 @@ class kb_assembly_compare:
                 for val in lens[ass_i]:
                     cumulative_lens[ass_i].append(total_lens[ass_i]+val)
                     total_lens[ass_i] += val
-
+            for ass_i,ass_name in enumerate(assembly_names):
+                if total_lens[ass_i] > max_total:
+                    max_total = total_lens[ass_i]
+                
             """
             # DEBUG
             self.log (console, "SORTED VALS\n================================")
@@ -436,16 +440,16 @@ class kb_assembly_compare:
         plot_name_desc = "Cumulative Length (in bp)"
         self.log (console, "GENERATING PLOT "+plot_name_desc)
         img_dpi = 200
-        img_units = "in"
-        img_in_width  = 3.0
-        img_in_height = 2.0
-        x_margin = 0.01
-        y_margin = 0.01
-        title_fontsize = 12
-        text_color = "#606060"
-        fig = plt.figure()
-        fig.set_size_inches(img_in_width, img_in_height)
-        ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
+#        img_units = "in"
+#        img_in_width  = 3.0
+#        img_in_height = 2.0
+#        x_margin = 0.01
+#        y_margin = 0.01
+#        title_fontsize = 12
+#        text_color = "#606060"
+#        fig = plt.figure()
+#        fig.set_size_inches(img_in_width, img_in_height)
+#        ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
         """
         # Let's turn off visibility of all tic labels and boxes here
         for ax in fig.axes:
@@ -458,8 +462,20 @@ class kb_assembly_compare:
             ax.spines['left'].set_visible(False)    # left axis line
             ax.spines['right'].set_visible(False)   # right axis line
         """
-        ax = fig.axes[0]
-        ax.text (x_margin, 1.0-(y_margin), plot_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=title_fontsize, zorder=1)
+#        ax = fig.axes[0]
+#        ax.text (x_margin, 1.0-(y_margin), plot_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=title_fontsize, zorder=1)
+
+        # capture data into pandas
+        cumulative_lens_by_ass_name = dict()
+        for ass_i,ass_name in enumerate(assembly_names):
+            cumulative_lens_by_ass_name[ass_name] = pd.Series(cumulative_lens[ass_i])
+        cumulative_lens_df = pd.DataFrame(cumulative_lens_by_ass_name)
+        cumulative_lens_plot = cumulative_lens_df \
+                                .plot(kind="line", figsize=(15,5), ylim=(0,max_total), fontsize=15, lw=5)
+        cumulative_lens_plot.xaxis.grid(True)
+        cumulative_lens_plot.yaxis.grid(True) 
+        fig = cumulative_lens_plot.get_figure()
+
 
         # save plot
         self.log (console, "SAVING PLOT "+plot_name_desc)
@@ -470,7 +486,45 @@ class kb_assembly_compare:
         fig.savefig (output_png_file_path, dpi=img_dpi)
         fig.savefig (output_pdf_file_path, format='pdf')
 
-        # HERE
+
+        #### STEP 6: Create and Upload HTML Report
+        ##
+        self.log (console, "CREATING HTML REPORT")
+        cellpadding = 10
+        cellspacing = 10
+        border      = 1
+
+        html_report_lines = []
+        html_report_lines += ['<html>']
+        html_report_lines += ['<head>']
+        html_report_lines += ['<title>KBase Functional Domain Profile</title>']
+        html_report_lines += ['<style>']
+        html_report_lines += [".vertical-text {\ndisplay: inline-block;\noverflow: hidden;\nwidth: 0.65em;\n}\n.vertical-text__inner {\ndisplay: inline-block;\nwhite-space: nowrap;\nline-height: 1.1;\ntransform: translate(0,100%) rotate(-90deg);\ntransform-origin: 0 0;\n}\n.vertical-text__inner:after {\ncontent: \"\";\ndisplay: block;\nmargin: 0.0em 0 100%;\n}"]
+        html_report_lines += [".vertical-text_title {\ndisplay: inline-block;\noverflow: hidden;\nwidth: 1.0em;\n}\n.vertical-text__inner_title {\ndisplay: inline-block;\nwhite-space: nowrap;\nline-height: 1.0;\ntransform: translate(0,100%) rotate(-90deg);\ntransform-origin: 0 0;\n}\n.vertical-text__inner_title:after {\ncontent: \"\";\ndisplay: block;\nmargin: 0.0em 0 100%;\n}"]
+        html_report_lines += ['</style>']
+        html_report_lines += ['</head>']
+        html_report_lines += ['<body bgcolor="white">']
+
+        #html_report_lines += ['<tr><td valign=top align=left rowspan=1><div class="vertical-text_title"><div class="vertical-text__inner_title"><font color="'+text_color+'">'+label+'</font></div></div></td>']
+        html_report_lines += ['<table cellpadding='+str(cellpadding)+' cellspacing='+str(cellspacing)+' border='+str(border)+'>']
+        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan=10><img src="'+png_file+'"></td></tr>']
+
+        html_report_lines += ['</table>']
+        html_report_lines += ['</body>']
+        html_report_lines += ['</html>']
+
+        # write html to file and upload
+        self.log (console, "SAVING AND UPLOADING HTML REPORT")
+        html_report_str = "\n".join(html_report_lines)
+        html_file = os.path.join (html_output_dir, 'contig_distribution_report.html')
+        with open (html_file, 'w', 0) as html_handle:
+            html_handle.write(html_report_str)
+        try:
+            html_upload_ret = dfuClient.file_to_shock({'file_path': html_file,
+                                                       'make_handle': 0,
+                                                       'pack': 'zip'})
+        except:
+            raise ValueError ('Logging exception loading html_report to shock')
 
 
         #### STEP N: Build report
@@ -493,22 +547,14 @@ class kb_assembly_compare:
         reportObj['message'] = report_text
 
         if len(invalid_msgs) == 0:
-            pass
+
             # html report
-            """
-            try:
-                html_upload_ret = dfuClient.file_to_shock({'file_path': html_output_dir,
-                                                     'make_handle': 0,
-                                                     'pack': 'zip'})
-            except:
-                raise ValueError ('error uploading html report to shock')
             reportObj['direct_html_link_index'] = 0
             reportObj['html_links'] = [{'shock_id': html_upload_ret['shock_id'],
                                         'name': html_file,
-                                        'label': params['output_name']+' HTML'
+                                        'label': 'Contig Distribution Report'+' HTML'
                                     }
                                    ]
-            """
 
 
         # save report object
