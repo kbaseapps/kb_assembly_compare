@@ -268,7 +268,6 @@ class kb_assembly_compare:
             read_buf_size  = 65536
             #write_buf_size = 65536
 
-            max_len = 0
             lens = []
             for ass_i,assembly_file_path in enumerate(score_assembly_file_paths):
                 ass_name = assembly_names[ass_i]
@@ -281,38 +280,53 @@ class kb_assembly_compare:
                         if fasta_line.startswith('>'):
                             if seq_buf != '':
                                 seq_len = len(seq_buf)
-                                if seq_len > max_len:
-                                    max_len = seq_len
                                 lens[ass_i].append(seq_len)
                                 seq_buf = ''
                         else:
                             seq_buf += ''.join(fasta_line.split())
                     if seq_buf != '':
                         seq_len = len(seq_buf)
-                        if seq_len > max_len:
-                            max_len = seq_len
                         lens[ass_i].append(seq_len)
                         seq_buf = ''
+
+            # sort lens
+            max_len = 0
+            max_lens = []
+            for ass_i,ass_name in enumerate(assembly_names):
+                self.log (console, "Building summary and histograms from assembly: "+ass_name)  # DEBUG
+                lens[ass_i].sort(key=int, reverse=True)  # sorting is critical
+                max_lens.append(lens[ass_i][0])
+                if lens[ass_i][0] > max_len:
+                    max_len = lens[ass_i][0]
 
             # count buckets and develop histogram
             hist_window_width = 10000  # make it log scale?
             N_hist_windows = int(max_len % hist_window_width)  
             len_buckets = [ 1000000, 500000, 100000, 50000, 10000, 5000, 1000, 500, 0 ]
             summary_stats = []
+            cumulative_len_stats = []
             hist = []
             for ass_i,ass_name in enumerate(assembly_names):
                 self.log (console, "Building summary and histograms from assembly: "+ass_name)  # DEBUG
-                lens[ass_i].sort(key=int, reverse=True)
+                lens[ass_i].sort(key=int, reverse=True)  # sorting is critical
 
                 # summary stats
                 summary_stats.append(dict())
+                cumulative_len_stats.append(dict())
                 for bucket in len_buckets:
                     summary_stats[ass_i][bucket] = 0
-                    for val in lens[ass_i]:
+                    cumulative_len_stats[ass_i][bucket] = 0
+                curr_bucket_i = 0
+                for val in lens[ass_i]:
+                    for bucket_i in range(curr_bucket_i,len(len_buckets)):
+                        bucket = len_buckets[bucket_i]
                         if val >= bucket:
                             summary_stats[ass_i][bucket] += 1
+                            cumulative_len_stats[ass_i][bucket] += val
+                            #curr_bucket_i = bucket_i
+                            #break
                         else:
-                            break
+                            curr_bucket_i = bucket_i + 1
 
                 # histogram
                 hist.append([])
@@ -335,9 +349,16 @@ class kb_assembly_compare:
         if len(invalid_msgs) == 0:
             for ass_i,ass_name in enumerate(assembly_names):
                 report_text += "ASSEMBLY STATS for "+ass_name+"\n"
+
+                report_text += "\t"+"L longest contig:\t"+str(max_lens[ass_i])+" bp"+"\n"
                 for bucket in len_buckets:
-                    report_text += "\t"+"Ncontigs >= "+str(bucket)+"bp:\t"+str(summary_stats[ass_i][bucket])+"\n"
+                    report_text += "\t"+"Ncontigs >= "+str(bucket)+" bp:\t"+str(summary_stats[ass_i][bucket])+"\n"
                 report_text += "\n"
+
+                for bucket in len_buckets:
+                    report_text += "\t"+"Lcontigs >= "+str(bucket)+" bp:\t"+str(cumulative_len_stats[ass_i][bucket])+" bp"+"\n"
+                report_text += "\n"
+
         self.log(console, report_text)  # DEBUG
 
 
