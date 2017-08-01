@@ -1,0 +1,38 @@
+#
+# define display information
+#
+name: Compare Assembled Contig Distributions
+tooltip: |
+    View distributions of contig characteristics for different assemblies
+screenshots: []
+
+icon: kb-blue.png
+
+#
+# define a set of similar methods that might be useful to the user
+#
+suggestions:
+    apps:
+        related:
+            []
+        next:
+            []
+    methods:
+        related:
+            []
+        next:
+            []
+
+#
+# Configure the display and description of parameters
+#
+parameters :
+    input_assembly_refs:
+        ui-name : |
+            Assembly(s) or AssemblySet(s) <font color=red>*</font>
+        short-hint : |
+            Genomes to use as benchmark
+
+description : |
+    <p>This method allows the user to compare attributes of the distributions of characteristics of contigs from different assemblies.</p>
+
