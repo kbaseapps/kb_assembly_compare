@@ -18,7 +18,12 @@ from pprint import pprint, pformat
 
 import numpy as np
 import math
-from Bio import SeqIO
+#from Bio import SeqIO
+import pandas as pd
+import matplotlib.pyplot as plt
+#from matplotlib.patches import Arc
+#from matplotlib.patches import Rectangle
+from matplotlib.patches import Circle
 
 from Workspace.WorkspaceClient import Workspace as workspaceService
 from AssemblyUtil.AssemblyUtilClient import AssemblyUtil
@@ -425,7 +430,50 @@ class kb_assembly_compare:
         self.log(console, report_text)  # DEBUG
 
 
-        #### STEP 5: Build report
+        #### STEP 5: Make figures with matplotlib and pandas
+        ##
+        plot_name = "cumulative_len_plot"
+        plot_name_desc = "Cumulative Length (in bp)"
+        self.log (console, "GENERATING PLOT "+plot_name_desc)
+        img_dpi = 200
+        img_units = "in"
+        img_in_width  = 3.0
+        img_in_height = 2.0
+        x_margin = 0.01
+        y_margin = 0.01
+        title_fontsize = 12
+        text_color = "#606060"
+        fig = plt.figure()
+        fig.set_size_inches(img_in_width, img_in_height)
+        ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
+        """
+        # Let's turn off visibility of all tic labels and boxes here
+        for ax in fig.axes:
+            ax.xaxis.set_visible(False)  # remove axis labels and tics
+            ax.yaxis.set_visible(False)
+            for t in ax.get_xticklabels()+ax.get_yticklabels():  # remove tics
+                t.set_visible(False)
+            ax.spines['top'].set_visible(False)     # Get rid of top axis line
+            ax.spines['bottom'].set_visible(False)  # bottom axis line
+            ax.spines['left'].set_visible(False)    # left axis line
+            ax.spines['right'].set_visible(False)   # right axis line
+        """
+        ax = fig.axes[0]
+        ax.text (x_margin, 1.0-(y_margin), plot_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=title_fontsize, zorder=1)
+
+        # save plot
+        self.log (console, "SAVING PLOT "+plot_name_desc)
+        png_file = plot_name+".png"
+        pdf_file = plot_name+".pdf"
+        output_png_file_path = os.path.join (html_output_dir, png_file)
+        output_pdf_file_path = os.path.join (html_output_dir, pdf_file)
+        fig.savefig (output_png_file_path, dpi=img_dpi)
+        fig.savefig (output_pdf_file_path, format='pdf')
+
+        # HERE
+
+
+        #### STEP N: Build report
         ##
         reportName = 'run_contig_distribution_compare_report_'+str(uuid.uuid4())
         reportObj = {'objects_created': [],

@@ -6,7 +6,7 @@ MAINTAINER KBase Developer
 # install line here, a git checkout to download code, or run any other
 # installation scripts.
 
-# RUN apt-get update
+RUN apt-get update
 
 # Here we install a python coverage tool and an
 # https library that is out of date in the base image.
@@ -20,6 +20,11 @@ RUN pip install cffi --upgrade \
     && pip install pyasn1 --upgrade \
     && pip install requests --upgrade \
     && pip install 'requests[security]' --upgrade
+
+
+# Install pandas and X spoof
+RUN pip install pandas
+RUN apt-get -y install xvfb
 
 
 #### Install MUMmer4
