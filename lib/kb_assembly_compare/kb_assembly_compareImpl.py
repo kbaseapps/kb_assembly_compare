@@ -520,7 +520,7 @@ class kb_assembly_compare:
         with open (html_file, 'w', 0) as html_handle:
             html_handle.write(html_report_str)
         try:
-            html_upload_ret = dfuClient.file_to_shock({'file_path': html_file,
+            html_upload_ret = dfuClient.file_to_shock({'file_path': html_output_dir,
                                                        'make_handle': 0,
                                                        'pack': 'zip'})
         except:
