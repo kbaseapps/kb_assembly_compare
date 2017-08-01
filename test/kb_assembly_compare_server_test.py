@@ -114,7 +114,7 @@ class kb_assembly_compareTest(unittest.TestCase):
         ass_ref_2 = auClient.save_assembly_from_fasta({
             'file': {'path': ass_path_2},
             'workspace_name': self.getWsName(),
-            'assembly_name': 'assembly_1'
+            'assembly_name': 'assembly_2'
         })
 
         # run method
