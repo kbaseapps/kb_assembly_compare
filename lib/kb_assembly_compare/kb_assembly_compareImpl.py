@@ -238,7 +238,6 @@ class kb_assembly_compare:
                                 this_input_obj_info = wsClient.get_object_info_new ({'objects':[{'ref':this_assembly_ref}]})[0]
                                 this_input_obj_type = re.sub ('-[0-9]+\.[0-9]+$', "", input_obj_info[TYPE_I])  # remove trailing version
                                 this_input_obj_name = this_input_obj_info[NAME_I]
-                            
                                 assembly_names.append(this_input_obj_name)
                             except Exception as e:
                                 raise ValueError('Unable to get object from workspace: (' + this_assembly_ref +')' + str(e))
@@ -421,7 +420,7 @@ class kb_assembly_compare:
 
                 report_text += "\t"+"Len longest contig: "+str(max_lens[ass_i])+" bp"+"\n"
                 for perc in N.keys():
-                    report_text += "\t"+"N"+str(perc)+" (L"+str(perc)+"):\t"+str(N[perc][ass_i])+" ("+str(L[perc][ass_i]+")"+"\n"
+                    report_text += "\t"+"N"+str(perc)+" (L"+str(perc)+"):\t"+str(N[perc][ass_i])+" ("+str(L[perc][ass_i])+")"+"\n"
                 for bucket in len_buckets:
                     report_text += "\t"+"Num contigs >= "+str(bucket)+" bp:\t"+str(summary_stats[ass_i][bucket])+"\n"
                 report_text += "\n"
