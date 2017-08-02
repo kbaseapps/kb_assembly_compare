@@ -497,27 +497,31 @@ class kb_assembly_compare:
         html_report_lines = []
         html_report_lines += ['<html>']
         html_report_lines += ['<head>']
-        html_report_lines += ['<title>KBase Functional Domain Profile</title>']
-        html_report_lines += ['<style>']
-        html_report_lines += [".vertical-text {\ndisplay: inline-block;\noverflow: hidden;\nwidth: 0.65em;\n}\n.vertical-text__inner {\ndisplay: inline-block;\nwhite-space: nowrap;\nline-height: 1.1;\ntransform: translate(0,100%) rotate(-90deg);\ntransform-origin: 0 0;\n}\n.vertical-text__inner:after {\ncontent: \"\";\ndisplay: block;\nmargin: 0.0em 0 100%;\n}"]
-        html_report_lines += [".vertical-text_title {\ndisplay: inline-block;\noverflow: hidden;\nwidth: 1.0em;\n}\n.vertical-text__inner_title {\ndisplay: inline-block;\nwhite-space: nowrap;\nline-height: 1.0;\ntransform: translate(0,100%) rotate(-90deg);\ntransform-origin: 0 0;\n}\n.vertical-text__inner_title:after {\ncontent: \"\";\ndisplay: block;\nmargin: 0.0em 0 100%;\n}"]
-        html_report_lines += ['</style>']
+        html_report_lines += ['<title>KBase Assembled Contig Distributions</title>']
+#        html_report_lines += ['<style>']
+#        html_report_lines += [".vertical-text {\ndisplay: inline-block;\noverflow: hidden;\nwidth: 0.65em;\n}\n.vertical-text__inner {\ndisplay: inline-block;\nwhite-space: nowrap;\nline-height: 1.1;\ntransform: translate(0,100%) rotate(-90deg);\ntransform-origin: 0 0;\n}\n.vertical-text__inner:after {\ncontent: \"\";\ndisplay: block;\nmargin: 0.0em 0 100%;\n}"]
+#        html_report_lines += [".vertical-text_title {\ndisplay: inline-block;\noverflow: hidden;\nwidth: 1.0em;\n}\n.vertical-text__inner_title {\ndisplay: inline-block;\nwhite-space: nowrap;\nline-height: 1.0;\ntransform: translate(0,100%) rotate(-90deg);\ntransform-origin: 0 0;\n}\n.vertical-text__inner_title:after {\ncontent: \"\";\ndisplay: block;\nmargin: 0.0em 0 100%;\n}"]
+#        html_report_lines += ['</style>']
         html_report_lines += ['</head>']
         html_report_lines += ['<body bgcolor="white">']
 
-        #html_report_lines += ['<tr><td valign=top align=left rowspan=1><div class="vertical-text_title"><div class="vertical-text__inner_title"><font color="'+text_color+'">'+label+'</font></div></div></td>']
-        html_report_lines += ['<table cellpadding='+str(cellpadding)+' cellspacing='+str(cellspacing)+' border='+str(border)+'>']
-        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan=10><img src="'+png_file+'"></td></tr>']
 
-        html_report_lines += ['</table>']
+        html_report_lines += ['HELLO KITTY']
+        #html_report_lines += ['<tr><td valign=top align=left rowspan=1><div class="vertical-text_title"><div class="vertical-text__inner_title"><font color="'+text_color+'">'+label+'</font></div></div></td>']
+
+#        html_report_lines += ['<table cellpadding='+str(cellpadding)+' cellspacing='+str(cellspacing)+' border='+str(border)+'>']
+#        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan=10><img src="'+png_file+'"></td></tr>']
+
+#        html_report_lines += ['</table>']
         html_report_lines += ['</body>']
         html_report_lines += ['</html>']
 
         # write html to file and upload
         self.log (console, "SAVING AND UPLOADING HTML REPORT")
         html_report_str = "\n".join(html_report_lines)
-        html_file = os.path.join (html_output_dir, 'contig_distribution_report.html')
-        with open (html_file, 'w', 0) as html_handle:
+        html_file = 'contig_distribution_report.html'
+        html_file_path = os.path.join (html_output_dir, html_file)
+        with open (html_file_path, 'w', 0) as html_handle:
             html_handle.write(html_report_str)
         try:
             html_upload_ret = dfuClient.file_to_shock({'file_path': html_output_dir,
