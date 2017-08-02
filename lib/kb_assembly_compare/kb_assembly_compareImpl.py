@@ -237,7 +237,7 @@ class kb_assembly_compare:
                                 [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = range(11)  # object_info tuple
                                 this_input_obj_info = wsClient.get_object_info_new ({'objects':[{'ref':this_assembly_ref}]})[0]
                                 this_input_obj_type = re.sub ('-[0-9]+\.[0-9]+$', "", input_obj_info[TYPE_I])  # remove trailing version
-                                this_input_obj_name = input_obj_info[NAME_I]
+                                this_input_obj_name = this_input_obj_info[NAME_I]
                             
                                 assembly_names.append(this_input_obj_name)
                             except Exception as e:
@@ -419,16 +419,15 @@ class kb_assembly_compare:
             for ass_i,ass_name in enumerate(assembly_names):
                 report_text += "ASSEMBLY STATS for "+ass_name+"\n"
 
-                report_text += "\t"+"L longest contig:\t"+str(max_lens[ass_i])+" bp"+"\n"
+                report_text += "\t"+"Len longest contig: "+str(max_lens[ass_i])+" bp"+"\n"
                 for perc in N.keys():
-                    report_text += "\t"+"N"+str(perc)+":\t"+str(N[perc][ass_i])+"\n"
-                    report_text += "\t"+"L"+str(perc)+":\t"+str(L[perc][ass_i])+"\n"
+                    report_text += "\t"+"N"+str(perc)+" (L"+str(perc)+"):\t"+str(N[perc][ass_i])+" ("+str(L[perc][ass_i]+")"+"\n"
                 for bucket in len_buckets:
-                    report_text += "\t"+"Ncontigs >= "+str(bucket)+" bp:\t"+str(summary_stats[ass_i][bucket])+"\n"
+                    report_text += "\t"+"Num contigs >= "+str(bucket)+" bp:\t"+str(summary_stats[ass_i][bucket])+"\n"
                 report_text += "\n"
 
                 for bucket in len_buckets:
-                    report_text += "\t"+"Lcontigs >= "+str(bucket)+" bp:\t"+str(cumulative_len_stats[ass_i][bucket])+" bp"+"\n"
+                    report_text += "\t"+"Len contigs >= "+str(bucket)+" bp:\t"+str(cumulative_len_stats[ass_i][bucket])+" bp"+"\n"
                 report_text += "\n"
 
         self.log(console, report_text)  # DEBUG
@@ -506,13 +505,12 @@ class kb_assembly_compare:
         html_report_lines += ['<body bgcolor="white">']
 
 
-        html_report_lines += ['HELLO KITTY']
         #html_report_lines += ['<tr><td valign=top align=left rowspan=1><div class="vertical-text_title"><div class="vertical-text__inner_title"><font color="'+text_color+'">'+label+'</font></div></div></td>']
 
-#        html_report_lines += ['<table cellpadding='+str(cellpadding)+' cellspacing='+str(cellspacing)+' border='+str(border)+'>']
-#        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan=10><img src="'+png_file+'"></td></tr>']
+        html_report_lines += ['<table cellpadding='+str(cellpadding)+' cellspacing='+str(cellspacing)+' border='+str(border)+'>']
+        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan=10><img src="'+png_file+'"></td></tr>']
 
-#        html_report_lines += ['</table>']
+        html_report_lines += ['</table>']
         html_report_lines += ['</body>']
         html_report_lines += ['</html>']
 
