@@ -467,7 +467,7 @@ class kb_assembly_compare:
         ax.text (x_margin, 1.0-(y_margin), plot_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=title_fontsize, zorder=1)
 
         # build x and y coord lists
-        for ass_i,ass_name in enumerate(assembly_name):
+        for ass_i,ass_name in enumerate(assembly_names):
             x_coords = []
             y_coords = []
             for val_i,val in enumerate(cumulative_lens[ass_i]):
@@ -555,7 +555,7 @@ class kb_assembly_compare:
 
         # build x and y coord lists
         mini_delta = .000001
-        for ass_i,ass_name in enumerate(assembly_name):
+        for ass_i,ass_name in enumerate(assembly_names):
             x_coords = []
             y_coords = []
             running_sum = 0
