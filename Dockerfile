@@ -6,8 +6,7 @@ MAINTAINER KBase Developer
 # install line here, a git checkout to download code, or run any other
 # installation scripts.
 
-RUN apt-get update && \
-    ls
+RUN apt-get update && ls
 
 # Here we install a python coverage tool and an
 # https library that is out of date in the base image.
@@ -23,8 +22,10 @@ RUN pip install cffi --upgrade \
     && pip install 'requests[security]' --upgrade
 
 
-# Install pandas and X spoof
-RUN pip install pandas
+# Install pandas
+#RUN pip install pandas
+
+# Install X spoof execution wrapper
 RUN apt-get -y install xvfb
 
 
@@ -33,12 +34,12 @@ RUN apt-get -y install xvfb
 RUN mkdir -p /kb/module
 WORKDIR /kb/module
 # YAGGO
-RUN curl -s https://codeload.github.com/gmarcais/yaggo/tar.gz/v1.5.10 > yaggo.v1.5.10.tar.gz && \
-    tar xfz yaggo.v1.5.10.tar.gz && \
-    cd yaggo-1.5.10 && \
-    make DEST=/usr/local/bin && \
-    cp ./yaggo /usr/local/bin
-# MUMmer4
+#RUN curl -s https://codeload.github.com/gmarcais/yaggo/tar.gz/v1.5.10 > yaggo.v1.5.10.tar.gz && \
+#    tar xfz yaggo.v1.5.10.tar.gz && \
+#    cd yaggo-1.5.10 && \
+#    make DEST=/usr/local/bin && \
+#    cp ./yaggo /usr/local/bin
+## MUMmer4
 #RUN git clone https://github.com/mummer4/mummer && \
 #    cd mummer && \
 ##    mkdir aux_bin && \

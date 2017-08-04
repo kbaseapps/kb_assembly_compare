@@ -19,11 +19,11 @@ from pprint import pprint, pformat
 import numpy as np
 import math
 #from Bio import SeqIO
-import pandas as pd
+#import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.patches import Circle
 #from matplotlib.patches import Arc
 #from matplotlib.patches import Rectangle
-from matplotlib.patches import Circle
 
 from Workspace.WorkspaceClient import Workspace as workspaceService
 from AssemblyUtil.AssemblyUtilClient import AssemblyUtil
@@ -432,22 +432,25 @@ class kb_assembly_compare:
         self.log(console, report_text)  # DEBUG
 
 
-        #### STEP 5: Make figures with matplotlib and pandas
+        #### STEP 5: Make figures with matplotlib
         ##
+        file_links = [] 
+
+        # Cumulative len plot
         plot_name = "cumulative_len_plot"
         plot_name_desc = "Cumulative Length (in bp)"
         self.log (console, "GENERATING PLOT "+plot_name_desc)
         img_dpi = 200
-#        img_units = "in"
-#        img_in_width  = 3.0
-#        img_in_height = 2.0
-#        x_margin = 0.01
-#        y_margin = 0.01
-#        title_fontsize = 12
-#        text_color = "#606060"
-#        fig = plt.figure()
-#        fig.set_size_inches(img_in_width, img_in_height)
-#        ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
+        img_units = "in"
+        img_in_width  = 4.0
+        img_in_height = 3.0
+        x_margin = 0.01
+        y_margin = 0.01
+        title_fontsize = 12
+        text_color = "#606060"
+        fig = plt.figure()
+        fig.set_size_inches(img_in_width, img_in_height)
+        ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
         """
         # Let's turn off visibility of all tic labels and boxes here
         for ax in fig.axes:
@@ -460,9 +463,19 @@ class kb_assembly_compare:
             ax.spines['left'].set_visible(False)    # left axis line
             ax.spines['right'].set_visible(False)   # right axis line
         """
-#        ax = fig.axes[0]
-#        ax.text (x_margin, 1.0-(y_margin), plot_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=title_fontsize, zorder=1)
+        ax = fig.axes[0]
+        ax.text (x_margin, 1.0-(y_margin), plot_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=title_fontsize, zorder=1)
 
+        # build x and y coord lists
+        for ass_i,ass_name in enumerate(assembly_name):
+            x_coords = []
+            y_coords = []
+            for val_i,val in enumerate(cumulative_lens[ass_i]):
+                x_coords.append(val_i+1)
+                y_coords.append(val)
+            plt.plot(x_coords, y_coords, lw=4)
+
+        """
         # capture data into pandas
         cumulative_lens_by_ass_name = dict()
         for ass_i,ass_name in enumerate(assembly_names):
@@ -473,16 +486,120 @@ class kb_assembly_compare:
         cumulative_lens_plot.xaxis.grid(True)
         cumulative_lens_plot.yaxis.grid(True) 
         fig = cumulative_lens_plot.get_figure()
-
+        """
 
         # save plot
         self.log (console, "SAVING PLOT "+plot_name_desc)
-        png_file = plot_name+".png"
-        pdf_file = plot_name+".pdf"
+        cumulative_lens_png_file = png_file = plot_name+".png"
+        cumulative_lens_pdf_file = pdf_file = pdf_file = plot_name+".pdf"
         output_png_file_path = os.path.join (html_output_dir, png_file)
         output_pdf_file_path = os.path.join (html_output_dir, pdf_file)
         fig.savefig (output_png_file_path, dpi=img_dpi)
         fig.savefig (output_pdf_file_path, format='pdf')
+
+        # upload PNG
+        try:
+            upload_ret = dfuClient.file_to_shock({'file_path': output_png_file_path,
+                                                  'make_handle': 0,
+                                                  'pack': 'zip'})
+            file_links.append({'shock_id': upload_ret['shock_id'],
+                               'name': png_file,
+                               'label': plot_name_desc+' PNG'
+                               }
+                              )
+        except:
+            raise ValueError ('Logging exception loading png_file '+png_file+' to shock')
+        # upload PDF
+        try:
+            upload_ret = dfuClient.file_to_shock({'file_path': output_pdf_file_path,
+                                                  'make_handle': 0,
+                                                  'pack': 'zip'})
+            file_links.append({'shock_id': upload_ret['shock_id'],
+                               'name': pdf_file,
+                               'label': plot_name_desc+' PDF'
+                               }
+                              )
+        except:
+            raise ValueError ('Logging exception loading pdf_file '+pdf_file+' to shock')
+
+
+        # Sorted Contig len plot
+        plot_name = "sorteds_contig_engths"
+        plot_name_desc = "Sorted Contig Lengths (in bp)"
+        self.log (console, "GENERATING PLOT "+plot_name_desc)
+        img_dpi = 200
+        img_units = "in"
+        img_in_width  = 4.0
+        img_in_height = 3.0
+        x_margin = 0.01
+        y_margin = 0.01
+        title_fontsize = 12
+        text_color = "#606060"
+        fig = plt.figure()
+        fig.set_size_inches(img_in_width, img_in_height)
+        ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
+        """
+        # Let's turn off visibility of all tic labels and boxes here
+        for ax in fig.axes:
+            ax.xaxis.set_visible(False)  # remove axis labels and tics
+            ax.yaxis.set_visible(False)
+            for t in ax.get_xticklabels()+ax.get_yticklabels():  # remove tics
+                t.set_visible(False)
+            ax.spines['top'].set_visible(False)     # Get rid of top axis line
+            ax.spines['bottom'].set_visible(False)  # bottom axis line
+            ax.spines['left'].set_visible(False)    # left axis line
+            ax.spines['right'].set_visible(False)   # right axis line
+        """
+        ax = fig.axes[0]
+        ax.text (x_margin, 1.0-(y_margin), plot_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=title_fontsize, zorder=1)
+
+        # build x and y coord lists
+        mini_delta = .000001
+        for ass_i,ass_name in enumerate(assembly_name):
+            x_coords = []
+            y_coords = []
+            running_sum = 0
+            for val_i,val in enumerate(lens[ass_i]):
+                x_coords.append(running_sum + mini_delta)
+                y_coords.append(val)
+                running_sum += val
+                x_coords.append(running_sum)
+                y_coords.append(val)
+            plt.plot(x_coords, y_coords, lw=4)
+
+        # save plot
+        self.log (console, "SAVING PLOT "+plot_name_desc)
+        sorted_lens_png_file = png_file = plot_name+".png"
+        sorted_pens_pdf_file = pdf_file = plot_name+".pdf"
+        output_png_file_path = os.path.join (html_output_dir, png_file)
+        output_pdf_file_path = os.path.join (html_output_dir, pdf_file)
+        fig.savefig (output_png_file_path, dpi=img_dpi)
+        fig.savefig (output_pdf_file_path, format='pdf')
+
+        # upload PNG
+        try:
+            upload_ret = dfuClient.file_to_shock({'file_path': output_png_file_path,
+                                                  'make_handle': 0,
+                                                  'pack': 'zip'})
+            file_links.append({'shock_id': upload_ret['shock_id'],
+                               'name': png_file,
+                               'label': plot_name_desc+' PNG'
+                               }
+                              )
+        except:
+            raise ValueError ('Logging exception loading png_file '+png_file+' to shock')
+        # upload PDF
+        try:
+            upload_ret = dfuClient.file_to_shock({'file_path': output_pdf_file_path,
+                                                  'make_handle': 0,
+                                                  'pack': 'zip'})
+            file_links.append({'shock_id': upload_ret['shock_id'],
+                               'name': pdf_file,
+                               'label': plot_name_desc+' PDF'
+                               }
+                              )
+        except:
+            raise ValueError ('Logging exception loading pdf_file '+pdf_file+' to shock')
 
 
         #### STEP 6: Create and Upload HTML Report
@@ -491,6 +608,8 @@ class kb_assembly_compare:
         cellpadding = 10
         cellspacing = 10
         border      = 1
+        col_width   = 10
+        half_col_width = col_width // 2
 
         html_report_lines = []
         html_report_lines += ['<html>']
@@ -507,7 +626,8 @@ class kb_assembly_compare:
         #html_report_lines += ['<tr><td valign=top align=left rowspan=1><div class="vertical-text_title"><div class="vertical-text__inner_title"><font color="'+text_color+'">'+label+'</font></div></div></td>']
 
         html_report_lines += ['<table cellpadding='+str(cellpadding)+' cellspacing='+str(cellspacing)+' border='+str(border)+'>']
-        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan=10><img src="'+png_file+'"></td></tr>']
+        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(half_col_width)+'><img src="'+cumulative_lens_png_file+'"></td></tr>']
+        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(half_col_width)+'><img src="'+sorted_lens_png_file+'"></td></tr>']
 
         html_report_lines += ['</table>']
         html_report_lines += ['</body>']
@@ -556,6 +676,7 @@ class kb_assembly_compare:
                                         'label': 'Contig Distribution Report'+' HTML'
                                     }
                                    ]
+            reportObj['file_links'] = file_links
 
 
         # save report object
