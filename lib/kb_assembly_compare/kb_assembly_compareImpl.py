@@ -370,7 +370,7 @@ class kb_assembly_compare:
             hist_window_width = 10000  # make it log scale?
             N_hist_windows = int(max_len % hist_window_width)  
             #len_buckets = [ 1000000, 500000, 100000, 50000, 10000, 5000, 1000, 500, 0 ]
-            len_buckets = [ 1000000, 100000, 10000, 1000, 500, 0 ]
+            len_buckets = [ 1000000, 100000, 10000, 1000, 500, 1 ]
             summary_stats = []
             cumulative_len_stats = []
             hist = []
@@ -608,14 +608,17 @@ class kb_assembly_compare:
         hist_colspan = 6
         col_width   = 6 + hist_colspan  # in cells
         half_col_width = col_width // 2
-        img_height = 100  # in pixels
+        img_height = 500  # in pixels
         head_color = "#eeeeff"
         border_head_color = "#ffccff"
         text_fontsize = "2"
         text_color = '#606060'
         border_body_color = "#cccccc"
+        base_cell_color = "#eeeeee"
         cellpadding = "3"
         cellspacing = "2"
+        subtab_cellpadding = 1
+        subtab_cellspacing = 1
         border = "0"
         sp = '&nbsp;'
 
@@ -637,15 +640,13 @@ class kb_assembly_compare:
         html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(half_col_width)+'><img src="'+sorted_lens_png_file+'" height='+str(img_height)+'></td></tr>']
 
         # header
-        html_report_lines += ['<tr><td>sp</td></tr>']
-        html_report_lines += ['<tr><td>sp</td></tr>']
-        html_report_lines += ['<tr><td>sp</td></tr>']
+        html_report_lines += ['<tr><td>'+sp+'</td></tr>']
+        html_report_lines += ['<tr><td>'+sp+'</td></tr>']
         html_report_lines += ['<tr bgcolor="'+head_color+'">']
         # name
-        html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'Assembly'+'</font></td>']
+        html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+' align="left">'+'Assembly'+'</font></td>']
         # N50,L50 etc.
-        html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'Nx'+'</font></td>']
-        html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'Lx'+'</font></td>']
+        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'Nx (Lx)'+'</font></td>']
         # Summary Stats
         html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'Num Contigs'+'</font></td>']
         html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'Length Contigs'+'</font></td>']
@@ -656,32 +657,34 @@ class kb_assembly_compare:
         # report stats
         for ass_i,ass_name in enumerate(assembly_names):
             html_report_lines += ['<tr>']
-            html_report_lines += ['<td align="right">'+ass_name+'</td>']
+            html_report_lines += ['<td align="left">'+ass_name+'</td>']
 
             # N50, L50, etc.
-            html_report_lines += ['<td align="right"><table border=0 cellpadding=5 cellspacing=5>']
+            html_report_lines += ['<td align="right"><table border=0 cellpadding='+str(subtab_cellpadding)+' cellspacing='+str(subtab_cellspacing)+'>']
             for perc in sorted(N.keys(), key=int):
-                html_report_lines += ['<tr><td align="right">']
-                html_report_lines += ['N'+str(perc)+': '+str(N[perc][ass_i])]
-                html_report_lines += ['</td></tr>']
-            html_report_lines += ['</table></td>']
-            html_report_lines += ['<td align="right"><table border=0 cellpadding=5 cellspacing=5><tr>']
-            for perc in sorted(N.keys(), key=int):
-                html_report_lines += ['<tr><td align="right">']
-                html_report_lines += ['L'+str(perc)+': '+str(L[perc][ass_i])]
-                html_report_lines += ['</td></tr>']
-            html_report_lines += ['</table></td>']
+                html_report_lines += ['<tr><td align="right" color="'+base_cell_color+'>'+'N'+str(perc)+': </td><td align="right">'+str(N[perc][ass_i])+'</td></tr>']
+                html_report_lines += ['<tr><td align="right" color="'+base_cell_color+'>'+'L'+str(perc)+': </td><td align="right">('+str(L[perc][ass_i])+')</td></tr>']
+            html_report_lines += ['</table></td>']            
 
             # Summary Stats
-            html_report_lines += ['<td align="right"><table border=0 cellpadding=5 cellspacing=5><tr>']
+            html_report_lines += ['<td align="right"><table border=0 cellpadding='+str(subtab_cellpadding)+' cellspacing='+str(subtab_cellspacing)+'>']
+            for bucket in len_buckets:
+                html_report_lines += ['<tr><td align="right" color="'+base_cell_color+'">']
+                if bucket >= 1000:
+                    html_report_lines += ['10^'+str(math.log(bucket,10))]
+                else:
+                    html_report_lines += [str(bucket)]
+                html_report_lines += ['</td></tr>']
+            html_report_lines += ['</table></td>']
+            html_report_lines += ['<td align="right"><table border=0 cellpadding='+str(subtab_cellpadding)+' cellspacing='+str(subtab_cellspacing)+'>']
             for bucket in len_buckets:
                 html_report_lines += ['<tr><td align="right">']
                 html_report_lines += [str(summary_stats[ass_i][bucket])]
                 html_report_lines += ['</td></tr>']
             html_report_lines += ['</table></td>']
-            html_report_lines += ['<td align="right"><table border=0 cellpadding=5 cellspacing=5><tr>']
+            html_report_lines += ['<td align="right"><table border=0 cellpadding='+str(subtab_cellpadding)+' cellspacing='+str(subtab_cellspacing)+'>']
             for bucket in len_buckets:
-                html_report_lines += ['<tr><td align="right">']
+                html_report_lines += ['<tr><td align="right" color="'+base_cell_color+'">']
                 html_report_lines += [str(cumulative_len_stats[ass_i][bucket])]
                 html_report_lines += ['</td></tr>']
             html_report_lines += ['</table></td>']
