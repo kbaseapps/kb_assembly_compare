@@ -619,8 +619,8 @@ class kb_assembly_compare:
         base_cell_color = "#eeeeee"
         cellpadding = "3"
         cellspacing = "2"
-        subtab_cellpadding = 1
-        subtab_cellspacing = 1
+        subtab_cellpadding = "1"
+        subtab_cellspacing = "2"
         border = "0"
         sp = '&nbsp;'
 
@@ -650,9 +650,9 @@ class kb_assembly_compare:
         # N50,L50 etc.
         html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'Nx (Lx)'+'</font></td>']
         # Summary Stats
-        html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'LENGTH'+'</font></td>']
-        html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'NUM CONTIGS'+'</font></td>']
-        html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'SUM LENGTH (bp)'+'</font></td>']
+        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'LENGTH<br>(bp)'+'</font></td>']
+        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'NUM CONTIGS'+'</font></td>']
+        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'<nobr>SUM LENGTH</nobr><br>(bp)'+'</font></td>']
         # hist
         #html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'" colspan='+str(hist_colspan)+'><font color="'+text_color+'" size='+text_fontsize+'>'+'Contig Length Histogram'+'</font></td>']
         html_report_lines += ['</tr>']
@@ -665,8 +665,8 @@ class kb_assembly_compare:
             # N50, L50, etc.
             html_report_lines += ['<td align="right"><table border=0 cellpadding='+str(subtab_cellpadding)+' cellspacing='+str(subtab_cellspacing)+'>']
             for perc in sorted(N.keys(), key=int):
-                html_report_lines += ['<tr><td align="right" bgcolor="'+base_cell_color+'">'+'N'+str(perc)+': </td><td align="right">'+str(N[perc][ass_i])+'</td></tr>']
-                html_report_lines += ['<tr><td align="right" bgcolor="'+base_cell_color+'">'+'L'+str(perc)+': </td><td align="right">('+str(L[perc][ass_i])+')</td></tr>']
+                html_report_lines += ['<tr><td align="right" bgcolor="'+base_cell_color+'">'+'N'+str(perc)+': </td><td align="right">'+sp+str(N[perc][ass_i])+'</td></tr>']
+                html_report_lines += ['<tr><td align="right" bgcolor="'+base_cell_color+'">'+'L'+str(perc)+': </td><td align="right">'+sp+'('+str(L[perc][ass_i])+')'+'</td></tr>']
             html_report_lines += ['</table></td>']            
 
             # Summary Stats
@@ -674,9 +674,9 @@ class kb_assembly_compare:
             for bucket in len_buckets:
                 html_report_lines += ['<tr><td align="right" bgcolor="'+base_cell_color+'">']
                 if bucket >= 1000:
-                    html_report_lines += ['>= '+'10'+'<sup>'+str(int(math.log(bucket,10)+0.1))+'</sup>'+'bp']
+                    html_report_lines += ['<nobr>'+'&gt;= '+'10'+'<sup>'+str(int(math.log(bucket,10)+0.1))+'</sup>'+'</nobr>']
                 else:
-                    html_report_lines += ['>= '+str(bucket)+'bp']
+                    html_report_lines += ['<nobr>'+'&gt;= '+str(bucket)+'</nobr>']
                 html_report_lines += ['</td></tr>']
             html_report_lines += ['</table></td>']
             html_report_lines += ['<td align="right"><table border=0 cellpadding='+str(subtab_cellpadding)+' cellspacing='+str(subtab_cellspacing)+'>']
