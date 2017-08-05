@@ -674,7 +674,7 @@ class kb_assembly_compare:
             for bucket in len_buckets:
                 html_report_lines += ['<tr><td align="right" bgcolor="'+base_cell_color+'">']
                 if bucket >= 1000:
-                    html_report_lines += ['>= '+'10^'+'<font size=-1>'str(int(math.log(bucket,10)))+'</font>'+'bp']
+                    html_report_lines += ['>= '+'10^'+'<font size=-1>'+str(int(math.log(bucket,10)))+'</font>'+'bp']
                 else:
                     html_report_lines += ['>= '+str(bucket)+'bp']
                 html_report_lines += ['</td></tr>']
