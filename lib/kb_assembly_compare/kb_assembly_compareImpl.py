@@ -638,8 +638,8 @@ class kb_assembly_compare:
         #html_report_lines += ['<tr><td valign=top align=left rowspan=1><div class="vertical-text_title"><div class="vertical-text__inner_title"><font color="'+text_color+'">'+label+'</font></div></div></td>']
 
         html_report_lines += ['<table cellpadding='+str(cellpadding)+' cellspacing='+str(cellspacing)+' border='+str(border)+'>']
-        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(half_col_width)+'><img src="'+cumulative_lens_png_file+'" height='+str(img_height)+'></td></tr>']
-        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(half_col_width)+'><img src="'+sorted_lens_png_file+'" height='+str(img_height)+'></td></tr>']
+        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(half_col_width)+'><img src="'+cumulative_lens_png_file+'" height='+str(img_height)+'></td>']
+        html_report_lines += ['<td valign=top align=left rowspan=1 colspan='+str(half_col_width)+'><img src="'+sorted_lens_png_file+'" height='+str(img_height)+'></td></tr>']
 
         # header
         html_report_lines += ['<tr><td>'+sp+'</td></tr>']
@@ -665,8 +665,8 @@ class kb_assembly_compare:
             # N50, L50, etc.
             html_report_lines += ['<td align="right"><table border=0 cellpadding='+str(subtab_cellpadding)+' cellspacing='+str(subtab_cellspacing)+'>']
             for perc in sorted(N.keys(), key=int):
-                html_report_lines += ['<tr><td align="right" bgcolor="'+base_cell_color+'>'+'N'+str(perc)+': </td><td align="right">'+str(N[perc][ass_i])+'</td></tr>']
-                html_report_lines += ['<tr><td align="right" bgcolor="'+base_cell_color+'>'+'L'+str(perc)+': </td><td align="right">('+str(L[perc][ass_i])+')</td></tr>']
+                html_report_lines += ['<tr><td align="right" bgcolor="'+base_cell_color+'">'+'N'+str(perc)+': </td><td align="right">'+str(N[perc][ass_i])+'</td></tr>']
+                html_report_lines += ['<tr><td align="right" bgcolor="'+base_cell_color+'">'+'L'+str(perc)+': </td><td align="right">('+str(L[perc][ass_i])+')</td></tr>']
             html_report_lines += ['</table></td>']            
 
             # Summary Stats
@@ -674,7 +674,7 @@ class kb_assembly_compare:
             for bucket in len_buckets:
                 html_report_lines += ['<tr><td align="right" bgcolor="'+base_cell_color+'">']
                 if bucket >= 1000:
-                    html_report_lines += ['>= '+'10^'+'<font size=-1>'+str(int(math.log(bucket,10)))+'</font>'+'bp']
+                    html_report_lines += ['>= '+'10'+'<sup>'+str(int(math.log(bucket,10)+0.1))+'</sup>'+'bp']
                 else:
                     html_report_lines += ['>= '+str(bucket)+'bp']
                 html_report_lines += ['</td></tr>']
