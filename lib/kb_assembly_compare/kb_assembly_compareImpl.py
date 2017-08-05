@@ -442,7 +442,7 @@ class kb_assembly_compare:
         self.log (console, "GENERATING PLOT "+plot_name_desc)
         img_dpi = 200
         img_units = "in"
-        img_in_width  = 4.0
+        img_in_width  = 5.0
         img_in_height = 3.0
         x_margin = 0.01
         y_margin = 0.01
@@ -464,7 +464,8 @@ class kb_assembly_compare:
             ax.spines['right'].set_visible(False)   # right axis line
         """
         ax = fig.axes[0]
-        ax.text (x_margin, 1.0-(y_margin), plot_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=title_fontsize, zorder=1)
+        ax.set_title (plot_name_desc)
+        #ax.text (x_margin, 1.0-(y_margin), plot_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=title_fontsize, zorder=1)
 
         # build x and y coord lists
         for ass_i,ass_name in enumerate(assembly_names):
@@ -529,7 +530,7 @@ class kb_assembly_compare:
         self.log (console, "GENERATING PLOT "+plot_name_desc)
         img_dpi = 200
         img_units = "in"
-        img_in_width  = 4.0
+        img_in_width  = 5.0
         img_in_height = 3.0
         x_margin = 0.01
         y_margin = 0.01
@@ -551,7 +552,8 @@ class kb_assembly_compare:
             ax.spines['right'].set_visible(False)   # right axis line
         """
         ax = fig.axes[0]
-        ax.text (x_margin, 1.0-(y_margin), plot_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=title_fontsize, zorder=1)
+        ax.set_title (plot_name_desc)
+        #ax.text (x_margin, 1.0-(y_margin), plot_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=title_fontsize, zorder=1)
 
         # build x and y coord lists
         mini_delta = .000001
@@ -608,7 +610,7 @@ class kb_assembly_compare:
         hist_colspan = 6
         col_width   = 6 + hist_colspan  # in cells
         half_col_width = col_width // 2
-        img_height = 500  # in pixels
+        img_height = 300  # in pixels
         head_color = "#eeeeff"
         border_head_color = "#ffccff"
         text_fontsize = "2"
@@ -644,12 +646,13 @@ class kb_assembly_compare:
         html_report_lines += ['<tr><td>'+sp+'</td></tr>']
         html_report_lines += ['<tr bgcolor="'+head_color+'">']
         # name
-        html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+' align="left">'+'Assembly'+'</font></td>']
+        html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+' align="left">'+'ASSEMBLY'+'</font></td>']
         # N50,L50 etc.
         html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'Nx (Lx)'+'</font></td>']
         # Summary Stats
-        html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'Num Contigs'+'</font></td>']
-        html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'Length Contigs'+'</font></td>']
+        html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'LENGTH'+'</font></td>']
+        html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'NUM CONTIGS'+'</font></td>']
+        html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'SUM LENGTH (bp)'+'</font></td>']
         # hist
         #html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'" colspan='+str(hist_colspan)+'><font color="'+text_color+'" size='+text_fontsize+'>'+'Contig Length Histogram'+'</font></td>']
         html_report_lines += ['</tr>']
@@ -657,23 +660,23 @@ class kb_assembly_compare:
         # report stats
         for ass_i,ass_name in enumerate(assembly_names):
             html_report_lines += ['<tr>']
-            html_report_lines += ['<td align="left">'+ass_name+'</td>']
+            html_report_lines += ['<td align="left" bgcolor="'+base_cell_color+'">'+ass_name+'</td>']
 
             # N50, L50, etc.
             html_report_lines += ['<td align="right"><table border=0 cellpadding='+str(subtab_cellpadding)+' cellspacing='+str(subtab_cellspacing)+'>']
             for perc in sorted(N.keys(), key=int):
-                html_report_lines += ['<tr><td align="right" color="'+base_cell_color+'>'+'N'+str(perc)+': </td><td align="right">'+str(N[perc][ass_i])+'</td></tr>']
-                html_report_lines += ['<tr><td align="right" color="'+base_cell_color+'>'+'L'+str(perc)+': </td><td align="right">('+str(L[perc][ass_i])+')</td></tr>']
+                html_report_lines += ['<tr><td align="right" bgcolor="'+base_cell_color+'>'+'N'+str(perc)+': </td><td align="right">'+str(N[perc][ass_i])+'</td></tr>']
+                html_report_lines += ['<tr><td align="right" bgcolor="'+base_cell_color+'>'+'L'+str(perc)+': </td><td align="right">('+str(L[perc][ass_i])+')</td></tr>']
             html_report_lines += ['</table></td>']            
 
             # Summary Stats
             html_report_lines += ['<td align="right"><table border=0 cellpadding='+str(subtab_cellpadding)+' cellspacing='+str(subtab_cellspacing)+'>']
             for bucket in len_buckets:
-                html_report_lines += ['<tr><td align="right" color="'+base_cell_color+'">']
+                html_report_lines += ['<tr><td align="right" bgcolor="'+base_cell_color+'">']
                 if bucket >= 1000:
-                    html_report_lines += ['10^'+str(math.log(bucket,10))]
+                    html_report_lines += ['>= '+'10^'+'<font size=-1>'str(int(math.log(bucket,10)))+'</font>'+'bp']
                 else:
-                    html_report_lines += [str(bucket)]
+                    html_report_lines += ['>= '+str(bucket)+'bp']
                 html_report_lines += ['</td></tr>']
             html_report_lines += ['</table></td>']
             html_report_lines += ['<td align="right"><table border=0 cellpadding='+str(subtab_cellpadding)+' cellspacing='+str(subtab_cellspacing)+'>']
@@ -684,7 +687,7 @@ class kb_assembly_compare:
             html_report_lines += ['</table></td>']
             html_report_lines += ['<td align="right"><table border=0 cellpadding='+str(subtab_cellpadding)+' cellspacing='+str(subtab_cellspacing)+'>']
             for bucket in len_buckets:
-                html_report_lines += ['<tr><td align="right" color="'+base_cell_color+'">']
+                html_report_lines += ['<tr><td align="right">']
                 html_report_lines += [str(cumulative_len_stats[ass_i][bucket])]
                 html_report_lines += ['</td></tr>']
             html_report_lines += ['</table></td>']
