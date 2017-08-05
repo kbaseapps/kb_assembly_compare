@@ -473,7 +473,7 @@ class kb_assembly_compare:
             for val_i,val in enumerate(cumulative_lens[ass_i]):
                 x_coords.append(val_i+1)
                 y_coords.append(val)
-            plt.plot(x_coords, y_coords, lw=4)
+            plt.plot(x_coords, y_coords, lw=2)
 
         """
         # capture data into pandas
@@ -524,7 +524,7 @@ class kb_assembly_compare:
 
 
         # Sorted Contig len plot
-        plot_name = "sorteds_contig_engths"
+        plot_name = "sorted_contig_lengths"
         plot_name_desc = "Sorted Contig Lengths (in bp)"
         self.log (console, "GENERATING PLOT "+plot_name_desc)
         img_dpi = 200
@@ -565,7 +565,7 @@ class kb_assembly_compare:
                 running_sum += val
                 x_coords.append(running_sum)
                 y_coords.append(val)
-            plt.plot(x_coords, y_coords, lw=4)
+            plt.plot(x_coords, y_coords, lw=2)
 
         # save plot
         self.log (console, "SAVING PLOT "+plot_name_desc)
@@ -605,11 +605,19 @@ class kb_assembly_compare:
         #### STEP 6: Create and Upload HTML Report
         ##
         self.log (console, "CREATING HTML REPORT")
-        cellpadding = 10
-        cellspacing = 10
-        border      = 1
-        col_width   = 10
+        hist_colspan = 6
+        col_width   = 6 + hist_colspan  # in cells
         half_col_width = col_width // 2
+        img_height = 100  # in pixels
+        head_color = "#eeeeff"
+        border_head_color = "#ffccff"
+        text_fontsize = "2"
+        text_color = '#606060'
+        border_body_color = "#cccccc"
+        cellpadding = "3"
+        cellspacing = "2"
+        border = "0"
+        sp = '&nbsp;'
 
         html_report_lines = []
         html_report_lines += ['<html>']
@@ -622,12 +630,67 @@ class kb_assembly_compare:
         html_report_lines += ['</head>']
         html_report_lines += ['<body bgcolor="white">']
 
-
         #html_report_lines += ['<tr><td valign=top align=left rowspan=1><div class="vertical-text_title"><div class="vertical-text__inner_title"><font color="'+text_color+'">'+label+'</font></div></div></td>']
 
         html_report_lines += ['<table cellpadding='+str(cellpadding)+' cellspacing='+str(cellspacing)+' border='+str(border)+'>']
-        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(half_col_width)+'><img src="'+cumulative_lens_png_file+'"></td></tr>']
-        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(half_col_width)+'><img src="'+sorted_lens_png_file+'"></td></tr>']
+        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(half_col_width)+'><img src="'+cumulative_lens_png_file+'" height='+str(img_height)+'></td></tr>']
+        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(half_col_width)+'><img src="'+sorted_lens_png_file+'" height='+str(img_height)+'></td></tr>']
+
+        # header
+        html_report_lines += ['<tr><td>sp</td></tr>']
+        html_report_lines += ['<tr><td>sp</td></tr>']
+        html_report_lines += ['<tr><td>sp</td></tr>']
+        html_report_lines += ['<tr bgcolor="'+head_color+'">']
+        # name
+        html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'Assembly'+'</font></td>']
+        # N50,L50 etc.
+        html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'Nx'+'</font></td>']
+        html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'Lx'+'</font></td>']
+        # Summary Stats
+        html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'Num Contigs'+'</font></td>']
+        html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'Length Contigs'+'</font></td>']
+        # hist
+        #html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'" colspan='+str(hist_colspan)+'><font color="'+text_color+'" size='+text_fontsize+'>'+'Contig Length Histogram'+'</font></td>']
+        html_report_lines += ['</tr>']
+
+        # report stats
+        for ass_i,ass_name in enumerate(assembly_names):
+            html_report_lines += ['<tr>']
+            html_report_lines += ['<td align="right">'+ass_name+'</td>']
+
+            # N50, L50, etc.
+            html_report_lines += ['<td align="right"><table border=0 cellpadding=5 cellspacing=5>']
+            for perc in sorted(N.keys(), key=int):
+                html_report_lines += ['<tr><td align="right">']
+                html_report_lines += ['N'+str(perc)+': '+str(N[perc][ass_i])]
+                html_report_lines += ['</td></tr>']
+            html_report_lines += ['</table></td>']
+            html_report_lines += ['<td align="right"><table border=0 cellpadding=5 cellspacing=5><tr>']
+            for perc in sorted(N.keys(), key=int):
+                html_report_lines += ['<tr><td align="right">']
+                html_report_lines += ['L'+str(perc)+': '+str(L[perc][ass_i])]
+                html_report_lines += ['</td></tr>']
+            html_report_lines += ['</table></td>']
+
+            # Summary Stats
+            html_report_lines += ['<td align="right"><table border=0 cellpadding=5 cellspacing=5><tr>']
+            for bucket in len_buckets:
+                html_report_lines += ['<tr><td align="right">']
+                html_report_lines += [str(summary_stats[ass_i][bucket])]
+                html_report_lines += ['</td></tr>']
+            html_report_lines += ['</table></td>']
+            html_report_lines += ['<td align="right"><table border=0 cellpadding=5 cellspacing=5><tr>']
+            for bucket in len_buckets:
+                html_report_lines += ['<tr><td align="right">']
+                html_report_lines += [str(cumulative_len_stats[ass_i][bucket])]
+                html_report_lines += ['</td></tr>']
+            html_report_lines += ['</table></td>']
+
+            # Hist
+            
+
+
+            html_report_lines += ['</tr>']
 
         html_report_lines += ['</table>']
         html_report_lines += ['</body>']
