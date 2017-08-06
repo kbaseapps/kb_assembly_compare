@@ -440,6 +440,8 @@ class kb_assembly_compare:
             for ass_i,ass_name in enumerate(assembly_names):
                 if max_lens[ass_i] > best_val['len']:
                     best_val['len'] = max_lens[ass_i]
+                if max_lens[ass_i] < worst_val['len']:
+                    worst_val['len'] = max_lens[ass_i]
 
                 for perc in percs:
                     if N[perc][ass_i] > best_val['N'][perc]:
