@@ -449,9 +449,9 @@ class kb_assembly_compare:
                     if N[perc][ass_i] < worst_val['N'][perc]:
                         worst_val['N'][perc] = N[perc][ass_i]
                     if L[perc][ass_i] < best_val['L'][perc]:
-                        best_val['L'][perc] = N[perc][ass_i]
+                        best_val['L'][perc] = L[perc][ass_i]
                     if L[perc][ass_i] > worst_val['L'][perc]:
-                        worst_val['L'][perc] = N[perc][ass_i]
+                        worst_val['L'][perc] = L[perc][ass_i]
 
                 for bucket in len_buckets:
                     if summary_stats[ass_i][bucket] > best_val['summary_stats'][bucket]:
