@@ -658,6 +658,10 @@ class kb_assembly_compare:
         ##
         self.log (console, "CREATING HTML REPORT")
         def get_cell_color (val, best, worst, low_good=False):
+            self.log (console, "VAL: "+str(val)+" BEST: "+str(best)+" WORST: "+str(worst))  # DEBUG
+
+            if best == worst:
+                return '#ffffff'
             val_color_map = { 0: '00',
                               1: '11',
                               2: '22',
@@ -675,7 +679,7 @@ class kb_assembly_compare:
                               14: 'ee',
                               15: 'ff'
                              }
-            base_intensity = 5
+            base_intensity = 0  # 5
             top = 15 - base_intensity
             mid = 0.5 * (best + worst)
             if val == mid:
@@ -683,25 +687,30 @@ class kb_assembly_compare:
             if low_good:
                 if val < mid:
                     rescaled_val = int(0.5 + top * (val-best) / (mid-best))
+                    self.log (console, "A, MID: "+str(mid)+" RESCALED_VAL: "+str(rescaled_val))  # DEBUG
                     r = val_color_map[base_intensity + rescaled_val]
                     g = val_color_map[base_intensity + rescaled_val]
                     b = 'ff'
                 else:
                     rescaled_val = int(0.5 + top * (val-worst) / (mid-worst))
+                    self.log (console, "B, MID: "+str(mid)+" RESCALED_VAL: "+str(rescaled_val))  # DEBUG
                     r = 'ff'
                     g = val_color_map[base_intensity + rescaled_val]
                     b = val_color_map[base_intensity + rescaled_val]
             else:
                 if val > mid:
                     rescaled_val = int(0.5 + top * (val-best) / (mid-best))
+                    self.log (console, "C, MID: "+str(mid)+" RESCALED_VAL: "+str(rescaled_val))  # DEBUG
                     r = val_color_map[base_intensity + rescaled_val]
                     g = val_color_map[base_intensity + rescaled_val]
                     b = 'ff'
                 else:
                     rescaled_val = int(0.5 + top * (val-worst) / (mid-worst))
+                    self.log (console, "D, MID: "+str(mid)+" RESCALED_VAL: "+str(rescaled_val))  # DEBUG
                     r = 'ff'
                     g = val_color_map[base_intensity + rescaled_val]
                     b = val_color_map[base_intensity + rescaled_val]
+            self.log (console, "RGB: "+r+g+b)  # DEBUG
             return '#'+r+g+b
 
         hist_colspan = 5
