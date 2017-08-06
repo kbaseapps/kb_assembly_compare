@@ -492,7 +492,7 @@ class kb_assembly_compare:
         self.log (console, "GENERATING PLOT "+plot_name_desc)
         img_dpi = 200
         img_units = "in"
-        img_in_width  = 5.0
+        img_in_width  = 6.0
         img_in_height = 3.0
         x_margin = 0.01
         y_margin = 0.01
@@ -580,7 +580,7 @@ class kb_assembly_compare:
         self.log (console, "GENERATING PLOT "+plot_name_desc)
         img_dpi = 200
         img_units = "in"
-        img_in_width  = 5.0
+        img_in_width  = 6.0
         img_in_height = 3.0
         x_margin = 0.01
         y_margin = 0.01
@@ -657,7 +657,7 @@ class kb_assembly_compare:
         #### STEP 6: Create and Upload HTML Report
         ##
         self.log (console, "CREATING HTML REPORT")
-        def get_cell_color (val, best, worst, low_good):
+        def get_cell_color (val, best, worst, low_good=False):
             val_color_map = { 0: '00',
                               1: '11',
                               2: '22',
@@ -785,7 +785,7 @@ class kb_assembly_compare:
                     cell_color = get_cell_color (N[perc][ass_i], best_val['N'][perc], worst_val['N'][perc])
                     html_report_lines += ['<td align="right"'+bottom_edge+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+'N'+str(perc)+':</font></td><td bgcolor="'+cell_color+'" align="right"'+edges+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+sp+str(N[perc][ass_i])+'</font></td>']
                 else:
-                    cell_color = get_cell_color (L[perc][ass_i], best_val['L'][perc], worst_val['L'][perc], 'LOW_GOOD')
+                    cell_color = get_cell_color (L[perc][ass_i], best_val['L'][perc], worst_val['L'][perc], low_good=True)
                     html_report_lines += ['<td align="right"'+bottom_edge+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+'L'+str(perc)+':</font></td><td bgcolor="'+cell_color+'" align="right"'+edges+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+sp+'('+str(L[perc][ass_i])+')'+'</font></td></tr>']
 
                 # Summary Stats
