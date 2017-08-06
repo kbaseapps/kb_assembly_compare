@@ -676,7 +676,7 @@ class kb_assembly_compare:
                               14: 'ee',
                               15: 'ff'
                              }
-            base_intensity = 5
+            base_intensity = 9
             top = 15 - base_intensity
             mid = 0.5 * (best + worst)
             if val == mid:
@@ -710,9 +710,8 @@ class kb_assembly_compare:
             self.log (console, "RGB: "+r+g+b)  # DEBUG
             return '#'+r+g+b
 
-        hist_colspan = 5
-        col_width   = 5 + hist_colspan  # in cells
-        half_col_width = col_width // 2
+        hist_colspan = 1 # in cells
+        non_hist_colspan = 6 # in cells
         img_height = 300  # in pixels
         head_color = "#eeeeff"
         border_head_color = "#ffccff"
@@ -741,8 +740,8 @@ class kb_assembly_compare:
         #html_report_lines += ['<tr><td valign=top align=left rowspan=1><div class="vertical-text_title"><div class="vertical-text__inner_title"><font color="'+text_color+'">'+label+'</font></div></div></td>']
 
         html_report_lines += ['<table cellpadding='+str(cellpadding)+' cellspacing='+str(cellspacing)+' border='+str(border)+'>']
-        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(half_col_width)+'><img src="'+cumulative_lens_png_file+'" height='+str(img_height)+'></td>']
-        html_report_lines += ['<td valign=top align=left rowspan=1 colspan='+str(half_col_width)+'><img src="'+sorted_lens_png_file+'" height='+str(img_height)+'></td></tr>']
+        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(non_hist_colspan)+'><img src="'+cumulative_lens_png_file+'" height='+str(img_height)+'></td>']
+        html_report_lines += ['<td valign=top align=left rowspan=1 colspan='+str(hist_colspan)+'><img src="'+sorted_lens_png_file+'" height='+str(img_height)+'></td></tr>']
 
         # header
         html_report_lines += ['<tr><td>'+sp+'</td></tr>']
@@ -756,8 +755,8 @@ class kb_assembly_compare:
         html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'" colspan=2><font color="'+text_color+'" size='+text_fontsize+'>'+'Nx (Lx)'+'</font></td>']
         # Summary Stats
         html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'LENGTH<br>(bp)'+'</font></td>']
-        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'NUM CONTIGS'+'</font></td>']
-        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'<nobr>SUM LENGTH</nobr><br>(bp)'+'</font></td>']
+        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'NUM<br>CONTIGS'+'</font></td>']
+        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'SUM<br>LENGTH<br>(bp)'+'</font></td>']
         # hist
         #html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'" colspan='+str(hist_colspan)+'><font color="'+text_color+'" size='+text_fontsize+'>'+'Contig Length Histogram'+'</font></td>']
         html_report_lines += ['</tr>']
