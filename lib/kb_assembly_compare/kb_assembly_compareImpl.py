@@ -298,9 +298,35 @@ class kb_assembly_compare:
                 self.log (console, "Sorting contig lens for "+ass_name)  # DEBUG
                 lens[ass_i].sort(key=int, reverse=True)  # sorting is critical
 
-            # get max_lens for each assembly and overall max_len
+            # get min_max ranges
+            huge_val = 100000000000000000
+            len_buckets = [ 1000000, 100000, 10000, 1000, 500, 1 ]
+            percs = [50, 75, 90]
             max_len = 0
             max_lens = []
+            best_val = { 'len': 0,
+                         'N': {},
+                         'L': {},
+                         'summary_stats': {},
+                         'cumulative_len_stats': {}
+                         }
+            worst_val = { 'len': huge_val,
+                          'N': {},
+                          'L': {},
+                          'summary_stats': {},
+                          'cumulative_len_stats': {}
+                          }
+            for perc in percs:
+                best_val['N'][perc] = 0
+                best_val['L'][perc] = huge_val
+                worst_val['N'][perc] = huge_val
+                worst_val['L'][perc] = 0
+            for bucket in len_buckets:
+                best_val['summary_stats'][bucket] = 0
+                best_val['cumulative_len_stats'][bucket] = 0
+                worst_val['summary_stats'][bucket] = huge_val
+                worst_val['cumulative_len_stats'][bucket] = huge_val
+
             for ass_i,ass_name in enumerate(assembly_names):
                 self.log (console, "Getting max lens "+ass_name)  # DEBUG
                 this_max_len = lens[ass_i][0]
@@ -370,7 +396,6 @@ class kb_assembly_compare:
             hist_window_width = 10000  # make it log scale?
             N_hist_windows = int(max_len % hist_window_width)  
             #len_buckets = [ 1000000, 500000, 100000, 50000, 10000, 5000, 1000, 500, 0 ]
-            len_buckets = [ 1000000, 100000, 10000, 1000, 500, 1 ]
             summary_stats = []
             cumulative_len_stats = []
             hist = []
@@ -410,6 +435,31 @@ class kb_assembly_compare:
                 for hist_val in hist[ass_i]:
                     if hist_val > max_hist_height:
                         max_hist_height = hist_val
+
+            # adjust best and worst values
+            for ass_i,ass_name in enumerate(assembly_names):
+                if max_lens[ass_i] > best_val['len']:
+                    best_val['len'] = max_lens[ass_i]
+
+                for perc in percs:
+                    if N[perc][ass_i] > best_val['N'][perc]:
+                        best_val['N'][perc] = N[perc][ass_i]
+                    if N[perc][ass_i] < worst_val['N'][perc]:
+                        worst_val['N'][perc] = N[perc][ass_i]
+                    if L[perc][ass_i] < best_val['L'][perc]:
+                        best_val['L'][perc] = N[perc][ass_i]
+                    if L[perc][ass_i] > worst_val['L'][perc]:
+                        worst_val['L'][perc] = N[perc][ass_i]
+
+                for bucket in len_buckets:
+                    if summary_stats[ass_i][bucket] > best_val['summary_stats'][bucket]:
+                        best_val['summary_stats'][bucket] = summary_stats[ass_i][bucket]
+                    if summary_stats[ass_i][bucket] < worst_val['summary_stats'][bucket]:
+                        worst_val['summary_stats'][bucket] = summary_stats[ass_i][bucket]
+                    if cumulative_len_stats[ass_i][bucket] > best_val['cumulative_len_stats'][bucket]:
+                        best_val['cumulative_len_stats'][bucket] = cumulative_len_stats[ass_i][bucket]
+                    if cumulative_len_stats[ass_i][bucket] < worst_val['cumulative_len_stats'][bucket]:
+                        worst_val['cumulative_len_stats'][bucket] = cumulative_len_stats[ass_i][bucket]
 
 
         #### STEP 4: build text report
@@ -607,8 +657,55 @@ class kb_assembly_compare:
         #### STEP 6: Create and Upload HTML Report
         ##
         self.log (console, "CREATING HTML REPORT")
-        hist_colspan = 6
-        col_width   = 6 + hist_colspan  # in cells
+        def get_cell_color (val, best, worst, low_good):
+            val_color_map = { 0: '00',
+                              1: '11',
+                              2: '22',
+                              3: '33',
+                              4: '44',
+                              5: '55',
+                              6: '66',
+                              7: '77',
+                              8: '88',
+                              9: '99',
+                              10: 'aa',
+                              11: 'bb',
+                              12: 'cc',
+                              13: 'dd',
+                              14: 'ee',
+                              15: 'ff'
+                             }
+            base_intensity = 5
+            top = 15 - base_intensity
+            mid = 0.5 * (best + worst)
+            if val == mid:
+                return '#ffffff'
+            if low_good:
+                if val < mid:
+                    rescaled_val = int(0.5 + top * (val-best) / (mid-best))
+                    r = val_color_map[base_intensity + rescaled_val]
+                    g = val_color_map[base_intensity + rescaled_val]
+                    b = 'ff'
+                else:
+                    rescaled_val = int(0.5 + top * (val-worst) / (mid-worst))
+                    r = 'ff'
+                    g = val_color_map[base_intensity + rescaled_val]
+                    b = val_color_map[base_intensity + rescaled_val]
+            else:
+                if val > mid:
+                    rescaled_val = int(0.5 + top * (val-best) / (mid-best))
+                    r = val_color_map[base_intensity + rescaled_val]
+                    g = val_color_map[base_intensity + rescaled_val]
+                    b = 'ff'
+                else:
+                    rescaled_val = int(0.5 + top * (val-worst) / (mid-worst))
+                    r = 'ff'
+                    g = val_color_map[base_intensity + rescaled_val]
+                    b = val_color_map[base_intensity + rescaled_val]
+            return '#'+r+g+b
+
+        hist_colspan = 5
+        col_width   = 5 + hist_colspan  # in cells
         half_col_width = col_width // 2
         img_height = 300  # in pixels
         head_color = "#eeeeff"
@@ -647,8 +744,10 @@ class kb_assembly_compare:
         html_report_lines += ['<tr bgcolor="'+head_color+'">']
         # name
         html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+' align="left">'+'ASSEMBLY'+'</font></td>']
+        # Longest Len
+        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'Longest<br>Contig<br>(bp)'+'</font></td>']
         # N50,L50 etc.
-        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'Nx (Lx)'+'</font></td>']
+        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'" colspan=2><font color="'+text_color+'" size='+text_fontsize+'>'+'Nx (Lx)'+'</font></td>']
         # Summary Stats
         html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'LENGTH<br>(bp)'+'</font></td>']
         html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'NUM CONTIGS'+'</font></td>']
@@ -660,43 +759,51 @@ class kb_assembly_compare:
         # report stats
         for ass_i,ass_name in enumerate(assembly_names):
             html_report_lines += ['<tr>']
-            html_report_lines += ['<td align="left" bgcolor="'+base_cell_color+'">'+ass_name+'</td>']
+            # name
+            html_report_lines += ['<td align="left" bgcolor="'+base_cell_color+'" rowspan=6><font color="'+text_color+'" size='+text_fontsize+'>'+ass_name+'</font></td>']
 
-            # N50, L50, etc.
-            html_report_lines += ['<td align="right"><table border=0 cellpadding='+str(subtab_cellpadding)+' cellspacing='+str(subtab_cellspacing)+'>']
-            for perc in sorted(N.keys(), key=int):
-                html_report_lines += ['<tr><td align="right" bgcolor="'+base_cell_color+'">'+'N'+str(perc)+': </td><td align="right">'+sp+str(N[perc][ass_i])+'</td></tr>']
-                html_report_lines += ['<tr><td align="right" bgcolor="'+base_cell_color+'">'+'L'+str(perc)+': </td><td align="right">'+sp+'('+str(L[perc][ass_i])+')'+'</td></tr>']
-            html_report_lines += ['</table></td>']            
+            # longest contig
+            cell_color = get_cell_color (max_lens[ass_i], best_val['len'], worst_val['len'])
+            html_report_lines += ['<td bgcolor="'+cell_color+'" align="center" valign="middle" rowspan=6><font color="'+text_color+'" size='+text_fontsize+'>'+str(max_lens[ass_i])+'</font></td>']
 
-            # Summary Stats
-            html_report_lines += ['<td align="right"><table border=0 cellpadding='+str(subtab_cellpadding)+' cellspacing='+str(subtab_cellspacing)+'>']
-            for bucket in len_buckets:
-                html_report_lines += ['<tr><td align="right" bgcolor="'+base_cell_color+'">']
+            # subtable
+            N_rows = 6
+            edges = ' style="border-right:solid 2px '+border_body_color+'"'
+            bottom_edge = ''
+            for sub_i in range(N_rows):
+                perc = sorted(N.keys(), key=int)[sub_i // 2]
+                bucket = len_buckets[sub_i]
+                if sub_i == N_rows-1:
+                    edges = ' style="border-right:solid 2px '+border_body_color+'; border-bottom:solid 2px '+border_body_color+'"'
+                    bottom_edge = ' style="border-bottom:solid 2px '+border_body_color+'"'
+
+                # N50, L50, etc.
+                if sub_i > 0:
+                    html_report_lines += ['<tr>']
+                
+                if (sub_i % 2) == 0:
+                    cell_color = get_cell_color (N[perc][ass_i], best_val['N'][perc], worst_val['N'][perc])
+                    html_report_lines += ['<td align="right"'+bottom_edge+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+'N'+str(perc)+':</font></td><td bgcolor="'+cell_color+'" align="right"'+edges+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+sp+str(N[perc][ass_i])+'</font></td>']
+                else:
+                    cell_color = get_cell_color (L[perc][ass_i], best_val['L'][perc], worst_val['L'][perc], 'LOW_GOOD')
+                    html_report_lines += ['<td align="right"'+bottom_edge+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+'L'+str(perc)+':</font></td><td bgcolor="'+cell_color+'" align="right"'+edges+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+sp+'('+str(L[perc][ass_i])+')'+'</font></td></tr>']
+
+                # Summary Stats
+                html_report_lines += ['<td align="right"'+bottom_edge+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>']
                 if bucket >= 1000:
                     html_report_lines += ['<nobr>'+'&gt;= '+'10'+'<sup>'+str(int(math.log(bucket,10)+0.1))+'</sup>'+'</nobr>']
                 else:
                     html_report_lines += ['<nobr>'+'&gt;= '+str(bucket)+'</nobr>']
-                html_report_lines += ['</td></tr>']
-            html_report_lines += ['</table></td>']
-            html_report_lines += ['<td align="right"><table border=0 cellpadding='+str(subtab_cellpadding)+' cellspacing='+str(subtab_cellspacing)+'>']
-            for bucket in len_buckets:
-                html_report_lines += ['<tr><td align="right">']
-                html_report_lines += [str(summary_stats[ass_i][bucket])]
-                html_report_lines += ['</td></tr>']
-            html_report_lines += ['</table></td>']
-            html_report_lines += ['<td align="right"><table border=0 cellpadding='+str(subtab_cellpadding)+' cellspacing='+str(subtab_cellspacing)+'>']
-            for bucket in len_buckets:
-                html_report_lines += ['<tr><td align="right">']
-                html_report_lines += [str(cumulative_len_stats[ass_i][bucket])]
-                html_report_lines += ['</td></tr>']
-            html_report_lines += ['</table></td>']
+                html_report_lines += ['</font></td>']
+                
+                cell_color = get_cell_color (summary_stats[ass_i][bucket], best_val['summary_stats'][bucket], worst_val['summary_stats'][bucket])
+                html_report_lines += ['<td bgcolor="'+cell_color+'" align="right"'+bottom_edge+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+str(summary_stats[ass_i][bucket])+'</font></td>']
+
+                cell_color = get_cell_color (cumulative_len_stats[ass_i][bucket], best_val['cumulative_len_stats'][bucket], worst_val['cumulative_len_stats'][bucket])
+                html_report_lines += ['<td bgcolor="'+cell_color+'" align="right"'+edges+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+str(cumulative_len_stats[ass_i][bucket])+'</font></td>']
+                html_report_lines += ['</tr>']
 
             # Hist
-            
-
-
-            html_report_lines += ['</tr>']
 
         html_report_lines += ['</table>']
         html_report_lines += ['</body>']
