@@ -431,21 +431,6 @@ class kb_assembly_compare:
                         else:
                             curr_bucket_i = bucket_i + 1
 
-                # histogram
-                hist.append([])
-                for hist_i in range(N_hist_windows):
-                    hist[ass_i].append(0)
-                for val in lens[ass_i]:
-                    hist_i = int(val / hist_window_width)
-                    hist[ass_i][hist_i] += 1
-
-            # determine max height across histograms
-            max_hist_height = 0
-            for ass_i,ass_name in enumerate(assembly_names):
-                for hist_val in hist[ass_i]:
-                    if hist_val > max_hist_height:
-                        max_hist_height = hist_val
-
             # adjust best and worst values
             for ass_i,ass_name in enumerate(assembly_names):
                 if max_lens[ass_i] > best_val['len']:
