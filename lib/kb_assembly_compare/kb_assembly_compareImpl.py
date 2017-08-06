@@ -296,7 +296,7 @@ class kb_assembly_compare:
             # sort lens (absolutely critical to subsequent steps)
             for ass_i,ass_name in enumerate(assembly_names):
                 self.log (console, "Sorting contig lens for "+ass_name)  # DEBUG
-                lens[ass_i].sort(key=int, reverse=True)  # sorting is critical
+                lens[ass_i].sort(key=int, reverse=True)  # sorting is critical.  this sort() is in place
 
             # get min_max ranges
             huge_val = 100000000000000000
@@ -392,16 +392,26 @@ class kb_assembly_compare:
             # END DEBUG
             """
 
-            # count buckets and develop histogram
-            hist_window_width = 10000  # make it log scale?
-            N_hist_windows = int(max_len % hist_window_width)  
+            # count buckets and transform lens to log of length for hist
+            #hist_window_width = 10000  # make it log scale?
+            #N_hist_windows = int(max_len % hist_window_width)  
             #len_buckets = [ 1000000, 500000, 100000, 50000, 10000, 5000, 1000, 500, 0 ]
             summary_stats = []
             cumulative_len_stats = []
-            hist = []
+            #hist = []
+            log_lens = []
+            max_log_len = 0
             for ass_i,ass_name in enumerate(assembly_names):
                 self.log (console, "Building summary and histograms from assembly: "+ass_name)  # DEBUG
-                lens[ass_i].sort(key=int, reverse=True)  # sorting is critical
+                #lens[ass_i].sort(key=int, reverse=True)  # sorting is critical.  Already sorted
+
+                # get log lens
+                log_lens.append([])
+                for val in lens[ass_i]:
+                    log10_val = math.log10(val)
+                    if log10_val > max_log_len:
+                        max_log_len = log10_val
+                    log_lens[ass_i].append(log10_val)
 
                 # summary stats
                 summary_stats.append(dict())
@@ -681,7 +691,7 @@ class kb_assembly_compare:
                               14: 'ee',
                               15: 'ff'
                              }
-            base_intensity = 0  # 5
+            base_intensity = 5
             top = 15 - base_intensity
             mid = 0.5 * (best + worst)
             if val == mid:
@@ -756,7 +766,7 @@ class kb_assembly_compare:
         # name
         html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+' align="left">'+'ASSEMBLY'+'</font></td>']
         # Longest Len
-        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'Longest<br>Contig<br>(bp)'+'</font></td>']
+        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'LONGEST<br>CONTIG<br>(bp)'+'</font></td>']
         # N50,L50 etc.
         html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'" colspan=2><font color="'+text_color+'" size='+text_fontsize+'>'+'Nx (Lx)'+'</font></td>']
         # Summary Stats
@@ -797,7 +807,7 @@ class kb_assembly_compare:
                     html_report_lines += ['<td align="right"'+bottom_edge+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+'N'+str(perc)+':</font></td><td bgcolor="'+cell_color+'" align="right"'+edges+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+sp+str(N[perc][ass_i])+'</font></td>']
                 else:
                     cell_color = get_cell_color (L[perc][ass_i], best_val['L'][perc], worst_val['L'][perc], low_good=True)
-                    html_report_lines += ['<td align="right"'+bottom_edge+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+'L'+str(perc)+':</font></td><td bgcolor="'+cell_color+'" align="right"'+edges+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+sp+'('+str(L[perc][ass_i])+')'+'</font></td></tr>']
+                    html_report_lines += ['<td align="right"'+bottom_edge+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+'L'+str(perc)+':</font></td><td bgcolor="'+cell_color+'" align="right"'+edges+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+sp+'('+str(L[perc][ass_i])+')'+'</font></td>']
 
                 # Summary Stats
                 html_report_lines += ['<td align="right"'+bottom_edge+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>']
