@@ -756,7 +756,7 @@ class kb_assembly_compare:
         # name
         html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+' align="left">'+'ASSEMBLY'+'</font></td>']
         # Longest Len
-        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'Longest<br>Contig<br>(bp)'+'</font></td>']
+        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'LONGEST<br>CONTIG<br>(bp)'+'</font></td>']
         # N50,L50 etc.
         html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'" colspan=2><font color="'+text_color+'" size='+text_fontsize+'>'+'Nx (Lx)'+'</font></td>']
         # Summary Stats
@@ -797,7 +797,7 @@ class kb_assembly_compare:
                     html_report_lines += ['<td align="right"'+bottom_edge+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+'N'+str(perc)+':</font></td><td bgcolor="'+cell_color+'" align="right"'+edges+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+sp+str(N[perc][ass_i])+'</font></td>']
                 else:
                     cell_color = get_cell_color (L[perc][ass_i], best_val['L'][perc], worst_val['L'][perc], low_good=True)
-                    html_report_lines += ['<td align="right"'+bottom_edge+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+'L'+str(perc)+':</font></td><td bgcolor="'+cell_color+'" align="right"'+edges+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+sp+'('+str(L[perc][ass_i])+')'+'</font></td></tr>']
+                    html_report_lines += ['<td align="right"'+bottom_edge+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+'L'+str(perc)+':</font></td><td bgcolor="'+cell_color+'" align="right"'+edges+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+sp+'('+str(L[perc][ass_i])+')'+'</font></td>']
 
                 # Summary Stats
                 html_report_lines += ['<td align="right"'+bottom_edge+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>']
