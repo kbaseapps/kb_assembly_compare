@@ -688,7 +688,7 @@ class kb_assembly_compare:
         log10_binwidth = 0.1
         for ass_i,ass_name in enumerate(assembly_names):
             plt.hist(x_coords, y_coords, lw=2)
-            plt.hist(log10_lens[ass_i], log=True, bins=range(min_log10_len, max_log10_len + log10_binwidth, log10_binwidth))
+            plt.hist(log_lens[ass_i], log=True, bins=range(min_log10_len, max_log10_len + log10_binwidth, log10_binwidth))
 
         # save plot
         self.log (console, "SAVING PLOT "+plot_name_desc)
