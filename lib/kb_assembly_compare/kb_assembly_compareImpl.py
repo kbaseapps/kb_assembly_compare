@@ -539,7 +539,7 @@ class kb_assembly_compare:
         # save plot
         self.log (console, "SAVING PLOT "+plot_name_desc)
         cumulative_lens_png_file = png_file = plot_name+".png"
-        cumulative_lens_pdf_file = pdf_file = pdf_file = plot_name+".pdf"
+        cumulative_lens_pdf_file = pdf_file = plot_name+".pdf"
         output_png_file_path = os.path.join (html_output_dir, png_file)
         output_pdf_file_path = os.path.join (html_output_dir, pdf_file)
         fig.savefig (output_png_file_path, dpi=img_dpi)
@@ -651,78 +651,80 @@ class kb_assembly_compare:
             raise ValueError ('Logging exception loading pdf_file '+pdf_file+' to shock')
 
 
-        # Hist plot
-        plot_name = "hist_len_plot"
-        plot_name_desc = "Histogram of Contig Lengths (in bp)"
-        self.log (console, "GENERATING PLOT "+plot_name_desc)
-        img_dpi = 200
-        img_units = "in"
-        img_in_width  = 6.0
-        img_in_height = 3.0
-        x_margin = 0.01
-        y_margin = 0.01
-        title_fontsize = 12
-        text_color = "#606060"
-        fig = plt.figure()
-        fig.set_size_inches(img_in_width, img_in_height)
-        ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
-        """
-        # Let's turn off visibility of all tic labels and boxes here
-        for ax in fig.axes:
-            ax.xaxis.set_visible(False)  # remove axis labels and tics
-            ax.yaxis.set_visible(False)
-            for t in ax.get_xticklabels()+ax.get_yticklabels():  # remove tics
-                t.set_visible(False)
-            ax.spines['top'].set_visible(False)     # Get rid of top axis line
-            ax.spines['bottom'].set_visible(False)  # bottom axis line
-            ax.spines['left'].set_visible(False)    # left axis line
-            ax.spines['right'].set_visible(False)   # right axis line
-        """
-        ax = fig.axes[0]
-        ax.set_title (plot_name_desc)
-        #ax.text (x_margin, 1.0-(y_margin), plot_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=title_fontsize, zorder=1)
-
-        # build x and y coord lists
-        min_log10_len = 0
-        #max_log10_len  # set above
-        log10_binwidth = 0.1
+        # Hist plots for each assembly
+        hist_lens_png_files = []
+        hist_lens_pdf_files = []
         for ass_i,ass_name in enumerate(assembly_names):
-            plt.hist(x_coords, y_coords, lw=2)
-            plt.hist(log_lens[ass_i], log=True, bins=range(min_log10_len, max_log10_len + log10_binwidth, log10_binwidth))
+            plot_name = "hist_len_plot-"+ass_name
+            plot_name_desc = "Histogram of Contig Lengths (in bp)"
+            self.log (console, "GENERATING PLOT "+plot_name_desc)
+            img_dpi = 200
+            img_units = "in"
+            img_in_width  = 6.0
+            img_in_height = 3.0
+            x_margin = 0.01
+            y_margin = 0.01
+            title_fontsize = 12
+            text_color = "#606060"
+            fig = plt.figure()
+            fig.set_size_inches(img_in_width, img_in_height)
+            ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
+            """
+            # Let's turn off visibility of all tic labels and boxes here
+            for ax in fig.axes:
+                ax.xaxis.set_visible(False)  # remove axis labels and tics
+                ax.yaxis.set_visible(False)
+                for t in ax.get_xticklabels()+ax.get_yticklabels():  # remove tics
+                    t.set_visible(False)
+                ax.spines['top'].set_visible(False)     # Get rid of top axis line
+                ax.spines['bottom'].set_visible(False)  # bottom axis line
+                ax.spines['left'].set_visible(False)    # left axis line
+                ax.spines['right'].set_visible(False)   # right axis line
+            """
+            ax = fig.axes[0]
+            #ax.set_title (plot_name_desc)
 
-        # save plot
-        self.log (console, "SAVING PLOT "+plot_name_desc)
-        hist_lens_png_file = png_file = plot_name+".png"
-        hist_lens_pdf_file = pdf_file = pdf_file = plot_name+".pdf"
-        output_png_file_path = os.path.join (html_output_dir, png_file)
-        output_pdf_file_path = os.path.join (html_output_dir, pdf_file)
-        fig.savefig (output_png_file_path, dpi=img_dpi)
-        fig.savefig (output_pdf_file_path, format='pdf')
+            # plot hist
+            min_log10_len = 0
+            #max_log10_len  # set above
+            log10_binwidth = 0.1
+            plt.hist(log_lens[ass_i], log=False, bins=np.arange(min_log10_len, max_log10_len + log10_binwidth, log10_binwidth))
 
-        # upload PNG
-        try:
-            upload_ret = dfuClient.file_to_shock({'file_path': output_png_file_path,
-                                                  'make_handle': 0,
-                                                  'pack': 'zip'})
-            file_links.append({'shock_id': upload_ret['shock_id'],
-                               'name': png_file,
-                               'label': plot_name_desc+' PNG'
-                               }
-                              )
-        except:
-            raise ValueError ('Logging exception loading png_file '+png_file+' to shock')
-        # upload PDF
-        try:
-            upload_ret = dfuClient.file_to_shock({'file_path': output_pdf_file_path,
-                                                  'make_handle': 0,
-                                                  'pack': 'zip'})
-            file_links.append({'shock_id': upload_ret['shock_id'],
-                               'name': pdf_file,
-                               'label': plot_name_desc+' PDF'
-                               }
-                              )
-        except:
-            raise ValueError ('Logging exception loading pdf_file '+pdf_file+' to shock')
+            # save plot
+            self.log (console, "SAVING PLOT "+plot_name_desc)
+            png_file = plot_name+".png"
+            hist_lens_png_files.append(png_file)
+            hist_lens_pdf_file = pdf_file = plot_name+".pdf"
+            hist_lens_pdf_files.append(pdf_file)
+            output_png_file_path = os.path.join (html_output_dir, png_file)
+            output_pdf_file_path = os.path.join (html_output_dir, pdf_file)
+            fig.savefig (output_png_file_path, dpi=img_dpi)
+            fig.savefig (output_pdf_file_path, format='pdf')
+
+            # upload PNG
+            try:
+                upload_ret = dfuClient.file_to_shock({'file_path': output_png_file_path,
+                                                      'make_handle': 0,
+                                                      'pack': 'zip'})
+                file_links.append({'shock_id': upload_ret['shock_id'],
+                                   'name': png_file,
+                                   'label': plot_name_desc+' PNG'
+                                   }
+                                  )
+            except:
+                raise ValueError ('Logging exception loading png_file '+png_file+' to shock')
+            # upload PDF
+            try:
+                upload_ret = dfuClient.file_to_shock({'file_path': output_pdf_file_path,
+                                                      'make_handle': 0,
+                                                      'pack': 'zip'})
+                file_links.append({'shock_id': upload_ret['shock_id'],
+                                   'name': pdf_file,
+                                   'label': plot_name_desc+' PDF'
+                                   }
+                                  )
+            except:
+                raise ValueError ('Logging exception loading pdf_file '+pdf_file+' to shock')
 
 
         #### STEP 6: Create and Upload HTML Report
@@ -784,9 +786,11 @@ class kb_assembly_compare:
             self.log (console, "RGB: "+r+g+b)  # DEBUG
             return '#'+r+g+b
 
+        subtab_N_rows = 6
         hist_colspan = 1 # in cells
         non_hist_colspan = 6 # in cells
-        img_height = 300  # in pixels
+        big_img_height = 300  # in pixels
+        hist_img_height = 200  # in pixels
         head_color = "#eeeeff"
         border_head_color = "#ffccff"
         text_fontsize = "2"
@@ -816,7 +820,6 @@ class kb_assembly_compare:
         html_report_lines += ['<table cellpadding='+str(cellpadding)+' cellspacing='+str(cellspacing)+' border='+str(border)+'>']
         html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(non_hist_colspan)+'><img src="'+cumulative_lens_png_file+'" height='+str(img_height)+'></td>']
         html_report_lines += ['<td valign=top align=left rowspan=1 colspan='+str(hist_colspan)+'><img src="'+sorted_lens_png_file+'" height='+str(img_height)+'></td></tr>']
-        html_report_lines += ['<td valign=top align=left rowspan=1 colspan='+str(hist_colspan)+'><img src="'+hist_lens_png_file+'" height='+str(img_height)+'></td></tr>']
 
         # header
         html_report_lines += ['<tr><td>'+sp+'</td></tr>']
@@ -840,17 +843,16 @@ class kb_assembly_compare:
         for ass_i,ass_name in enumerate(assembly_names):
             html_report_lines += ['<tr>']
             # name
-            html_report_lines += ['<td align="left" bgcolor="'+base_cell_color+'" rowspan=6><font color="'+text_color+'" size='+text_fontsize+'>'+ass_name+'</font></td>']
+            html_report_lines += ['<td align="left" bgcolor="'+base_cell_color+'" rowspan='+str(subtab_N_rows)+'><font color="'+text_color+'" size='+text_fontsize+'>'+ass_name+'</font></td>']
 
             # longest contig
             cell_color = get_cell_color (max_lens[ass_i], best_val['len'], worst_val['len'])
-            html_report_lines += ['<td bgcolor="'+cell_color+'" align="center" valign="middle" rowspan=6><font color="'+text_color+'" size='+text_fontsize+'>'+str(max_lens[ass_i])+'</font></td>']
+            html_report_lines += ['<td bgcolor="'+cell_color+'" align="center" valign="middle" rowspan='+str(subtab_N_rows)+'><font color="'+text_color+'" size='+text_fontsize+'>'+str(max_lens[ass_i])+'</font></td>']
 
             # subtable
-            N_rows = 6
             edges = ' style="border-right:solid 2px '+border_body_color+'"'
             bottom_edge = ''
-            for sub_i in range(N_rows):
+            for sub_i in range(subtab_N_rows):
                 perc = sorted(N.keys(), key=int)[sub_i // 2]
                 bucket = len_buckets[sub_i]
                 if sub_i == N_rows-1:
@@ -881,9 +883,12 @@ class kb_assembly_compare:
 
                 cell_color = get_cell_color (cumulative_len_stats[ass_i][bucket], best_val['cumulative_len_stats'][bucket], worst_val['cumulative_len_stats'][bucket])
                 html_report_lines += ['<td bgcolor="'+cell_color+'" align="right"'+edges+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+str(cumulative_len_stats[ass_i][bucket])+'</font></td>']
-                html_report_lines += ['</tr>']
+                if ass_i > 0:
+                    html_report_lines += ['</tr>']
 
             # Hist
+            html_report_lines += ['<td valign=top align=left rowspan='+str(subtab_N_rows)+' colspan='+str(hist_colspan)+'><img src="'+hist_lens_png_files[ass_i]+'" height='+str(hist_img_height)+'></td>']
+            html_report_lines += ['</tr>']
 
         html_report_lines += ['</table>']
         html_report_lines += ['</body>']
