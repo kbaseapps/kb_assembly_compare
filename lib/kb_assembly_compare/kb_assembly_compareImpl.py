@@ -855,7 +855,7 @@ class kb_assembly_compare:
             for sub_i in range(subtab_N_rows):
                 perc = sorted(N.keys(), key=int)[sub_i // 2]
                 bucket = len_buckets[sub_i]
-                if sub_i == N_rows-1:
+                if sub_i == subtab_N_rows-1:
                     edges = ' style="border-right:solid 2px '+border_body_color+'; border-bottom:solid 2px '+border_body_color+'"'
                     bottom_edge = ' style="border-bottom:solid 2px '+border_body_color+'"'
 
