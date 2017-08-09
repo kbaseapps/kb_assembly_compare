@@ -702,8 +702,8 @@ class kb_assembly_compare:
                 ax.spines['right'].set_visible(False)   # right axis line
             """
             ax.grid(True)
-            ax.set_xlim = [0, max_len + hist_binwidth]
-            ax.set_ylim = [0, top_hist_cnt + top_hist_cnt // 10]
+            ax.set_xlim ([0, max_len + hist_binwidth])
+            ax.set_ylim ([0, top_hist_cnt + top_hist_cnt // 10])
             #ax.set_title (plot_name_desc)  # given in table column header
 
             # plot hist
@@ -714,7 +714,7 @@ class kb_assembly_compare:
             max_hist_bin_end = max_len
             binwidth = hist_binwidth
             #plt.hist(log_lens[ass_i], log=False, bins=np.arange(min_log10_len, max_log10_len + log10_binwidth, log10_binwidth))
-            plt.hist(hist_vals[ass_i], log=False, bins=np.arange(min_hist_bin_beg, max_hist_bin_end + binwidth, binwidth))
+            #plt.hist(hist_vals[ass_i], log=False, bins=np.arange(min_hist_bin_beg, max_hist_bin_end + binwidth, binwidth))
             plt.hist(hist_vals[ass_i], log=False, bins=range(min_hist_bin_beg, max_hist_bin_end + binwidth, binwidth))
 
             # save plot
