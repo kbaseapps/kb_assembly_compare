@@ -715,6 +715,7 @@ class kb_assembly_compare:
             binwidth = hist_binwidth
             #plt.hist(log_lens[ass_i], log=False, bins=np.arange(min_log10_len, max_log10_len + log10_binwidth, log10_binwidth))
             plt.hist(hist_vals[ass_i], log=False, bins=np.arange(min_hist_bin_beg, max_hist_bin_end + binwidth, binwidth))
+            plt.hist(hist_vals[ass_i], log=False, bins=range(min_hist_bin_beg, max_hist_bin_end + binwidth, binwidth))
 
             # save plot
             self.log (console, "SAVING PLOT "+plot_name_desc)
