@@ -420,7 +420,7 @@ class kb_assembly_compare:
                 """
                 hist_vals.append([])
                 hist_cnt_by_bin.append([])
-                for bin_i in range(max_len // hist_binwidth):
+                for bin_i in range((max_len // hist_binwidth)+1):
                     hist_cnt_by_bin[ass_i].append(0)
                 for val in lens[ass_i]:
                     bin_i = val // hist_binwidth
