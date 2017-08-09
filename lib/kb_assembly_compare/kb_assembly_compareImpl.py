@@ -720,17 +720,17 @@ class kb_assembly_compare:
                     ax.spines['right'].set_visible(False)   # right axis line
                 """
                 ax.grid(True)
-                ax.set_xlim ([0, max_len + hist_binwidth])
-                ax.set_ylim ([0, top_hist_cnt + top_hist_cnt // 10])
+                min_hist_bin_beg = 0
+                max_hist_bin_end = long_len
+                binwidth = hist_binwidth[hist_i]
+                ax.set_xlim ([0, max_hist_bin_end + binwidth])
+                ax.set_ylim ([0, top_hist_cnt[hist_i] + top_hist_cnt[hist_i] // 10])
                 #ax.set_title (plot_name_desc)  # given in table column header
 
                 # plot hist
                 #min_log10_len = 0
                 ##max_log10_len  # set above
                 #log10_binwidth = 0.1
-                min_hist_bin_beg = 0
-                max_hist_bin_end = long_len
-                binwidth = hist_binwidth[hist_i]
                 plt.hist(hist_vals[ass_i][hist_i], log=False, bins=range(min_hist_bin_beg, max_hist_bin_end + binwidth, binwidth))
 
                 # save plot
