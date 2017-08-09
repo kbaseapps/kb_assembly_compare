@@ -419,7 +419,7 @@ class kb_assembly_compare:
                     log_lens[ass_i].append(log10_val)
                 """
                 hist_vals.append([])
-                hist_cnt.append([])
+                hist_cnt_by_bin.append([])
                 for bin_i in range(max_val // hist_binwidth):
                     hist_cnt_by_bin[ass_i].append(0)
                 for val in lens[ass_i]:
