@@ -363,15 +363,12 @@ class kb_assembly_compare:
             """
 
             # get N50 and L50 (and 75s, and 90s)
-            N = { 50: [],
-                  75: [],
-                  90: []
-              }
-            L = { 50: [],
-                  75: [],
-                  90: []
-              }
-            for perc in N.keys():
+            N = dict()
+            L = dict()
+            for perc in percs:
+                N[perc] = []
+                L[perc] = []
+            for perc in percs:
                 frac = perc/100.0
                 for ass_i,ass_name in enumerate(assembly_names):
                     self.log (console, "Getting N/L"+str(perc)+" for "+ass_name)  # DEBUG
@@ -386,11 +383,13 @@ class kb_assembly_compare:
             self.log (console, "N50, etc.\n================================")
             for ass_i,ass_name in enumerate(assembly_names):
                 self.log (console, ass_name)
-                for perc in N.keys():
+                for perc in percs:
                     self.log (console, "\t"+"N"+str(perc)+": "+str(N[perc][ass_i]))
                     self.log (console, "\t"+"L"+str(perc)+": "+str(L[perc][ass_i]))
             # END DEBUG
             """
+
+            # count buckets and make hist without lens < 10K
 
             # count buckets and transform lens to log of length for hist
             #hist_window_width = 10000  # make it log scale?
@@ -398,13 +397,19 @@ class kb_assembly_compare:
             #len_buckets = [ 1000000, 500000, 100000, 50000, 10000, 5000, 1000, 500, 0 ]
             summary_stats = []
             cumulative_len_stats = []
-            #hist = []
-            log_lens = []
-            max_log_len = 0
+            hist_vals = []
+            hist_cnt_by_bin = []  # just to get shared heights for separate hist graphs
+            top_hist_cnt = 0
+            hist_binwidth = 10000
+            min_hist_val_accept = 10000
+            #log_lens = []
+            #max_log_len = 0
             for ass_i,ass_name in enumerate(assembly_names):
                 self.log (console, "Building summary and histograms from assembly: "+ass_name)  # DEBUG
                 #lens[ass_i].sort(key=int, reverse=True)  # sorting is critical.  Already sorted
-
+                
+                # hist
+                """
                 # get log lens
                 log_lens.append([])
                 for val in lens[ass_i]:
@@ -412,6 +417,18 @@ class kb_assembly_compare:
                     if log10_val > max_log_len:
                         max_log10_len = log10_val
                     log_lens[ass_i].append(log10_val)
+                """
+                hist.append([])
+                hist_cnt.append([])
+                for bin_i in range(max_val // hist_binwidth):
+                    hist_cnt_by_bin[ass_i].append(0)
+                for val in lens[ass_i]:
+                    bin_i = val // hist_binwidth
+                    hist_cnt_by_bin[ass_i][bin_i] += 1
+                    if val >= min_hist_val_accept:
+                        hist_vals[ass_i].append(val)
+                        if hist_cnt_by_bin[ass_i][bin_i] > top_hist_cnt:
+                            top_hist_cnt = hist_cnt_by_bin[ass_i][bin_i]
 
                 # summary stats
                 summary_stats.append(dict())
@@ -466,7 +483,7 @@ class kb_assembly_compare:
                 report_text += "ASSEMBLY STATS for "+ass_name+"\n"
 
                 report_text += "\t"+"Len longest contig: "+str(max_lens[ass_i])+" bp"+"\n"
-                for perc in N.keys():
+                for perc in percs:
                     report_text += "\t"+"N"+str(perc)+" (L"+str(perc)+"):\t"+str(N[perc][ass_i])+" ("+str(L[perc][ass_i])+")"+"\n"
                 for bucket in len_buckets:
                     report_text += "\t"+"Num contigs >= "+str(bucket)+" bp:\t"+str(summary_stats[ass_i][bucket])+"\n"
@@ -497,7 +514,7 @@ class kb_assembly_compare:
         text_color = "#606060"
         fig = plt.figure()
         fig.set_size_inches(img_in_width, img_in_height)
-        ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
+        #ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
         """
         # Let's turn off visibility of all tic labels and boxes here
         for ax in fig.axes:
@@ -511,6 +528,7 @@ class kb_assembly_compare:
             ax.spines['right'].set_visible(False)   # right axis line
         """
         ax = fig.axes[0]
+        ax.grid(True)
         ax.set_title (plot_name_desc)
         #ax.text (x_margin, 1.0-(y_margin), plot_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=title_fontsize, zorder=1)
 
@@ -585,7 +603,7 @@ class kb_assembly_compare:
         text_color = "#606060"
         fig = plt.figure()
         fig.set_size_inches(img_in_width, img_in_height)
-        ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
+        #ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
         """
         # Let's turn off visibility of all tic labels and boxes here
         for ax in fig.axes:
@@ -599,6 +617,7 @@ class kb_assembly_compare:
             ax.spines['right'].set_visible(False)   # right axis line
         """
         ax = fig.axes[0]
+        ax.grid(True)
         ax.set_title (plot_name_desc)
         #ax.text (x_margin, 1.0-(y_margin), plot_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=title_fontsize, zorder=1)
 
@@ -668,7 +687,7 @@ class kb_assembly_compare:
             text_color = "#606060"
             fig = plt.figure()
             fig.set_size_inches(img_in_width, img_in_height)
-            ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
+            #ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
             """
             # Let's turn off visibility of all tic labels and boxes here
             for ax in fig.axes:
@@ -682,13 +701,20 @@ class kb_assembly_compare:
                 ax.spines['right'].set_visible(False)   # right axis line
             """
             ax = fig.axes[0]
-            #ax.set_title (plot_name_desc)
+            ax.grid(True)
+            ax.set_xlim = [0, max_len + hist_binwidth]
+            ax.set_ylim = [0, top_hist_cnt + top_hist_cnt // 10]
+            #ax.set_title (plot_name_desc)  # given in table column header
 
             # plot hist
-            min_log10_len = 0
-            #max_log10_len  # set above
-            log10_binwidth = 0.1
-            plt.hist(log_lens[ass_i], log=False, bins=np.arange(min_log10_len, max_log10_len + log10_binwidth, log10_binwidth))
+            #min_log10_len = 0
+            ##max_log10_len  # set above
+            #log10_binwidth = 0.1
+            min_hist_bin_beg = 0
+            max_hist_bin_end = max_len
+            binwidth = hist_binwidth
+            #plt.hist(log_lens[ass_i], log=False, bins=np.arange(min_log10_len, max_log10_len + log10_binwidth, log10_binwidth))
+            plt.hist(hist_vals[ass_i], log=False, bins=np.arange(min_hist_bin_beg, max_hist_bin_end + binwidth, binwidth))
 
             # save plot
             self.log (console, "SAVING PLOT "+plot_name_desc)
@@ -752,7 +778,7 @@ class kb_assembly_compare:
                               14: 'ee',
                               15: 'ff'
                              }
-            base_intensity = 9
+            base_intensity = 11
             top = 15 - base_intensity
             mid = 0.5 * (best + worst)
             if val == mid:
@@ -788,7 +814,7 @@ class kb_assembly_compare:
 
         subtab_N_rows = 6
         hist_colspan = 1 # in cells
-        non_hist_colspan = 6 # in cells
+        non_hist_colspan = 7 # in cells
         big_img_height = 300  # in pixels
         hist_img_height = 200  # in pixels
         head_color = "#eeeeff"
@@ -853,7 +879,7 @@ class kb_assembly_compare:
             edges = ' style="border-right:solid 2px '+border_body_color+'"'
             bottom_edge = ''
             for sub_i in range(subtab_N_rows):
-                perc = sorted(N.keys(), key=int)[sub_i // 2]
+                perc = percs[sub_i // 2]
                 bucket = len_buckets[sub_i]
                 if sub_i == subtab_N_rows-1:
                     edges = ' style="border-right:solid 2px '+border_body_color+'; border-bottom:solid 2px '+border_body_color+'"'
@@ -865,13 +891,13 @@ class kb_assembly_compare:
                 
                 if (sub_i % 2) == 0:
                     cell_color = get_cell_color (N[perc][ass_i], best_val['N'][perc], worst_val['N'][perc])
-                    html_report_lines += ['<td align="right"'+bottom_edge+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+'N'+str(perc)+':</font></td><td bgcolor="'+cell_color+'" align="right"'+edges+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+sp+str(N[perc][ass_i])+'</font></td>']
+                    html_report_lines += ['<td align="center"'+bottom_edge+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+'N'+str(perc)+':</font></td><td bgcolor="'+cell_color+'" align="right"'+edges+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+sp+str(N[perc][ass_i])+'</font></td>']
                 else:
                     cell_color = get_cell_color (L[perc][ass_i], best_val['L'][perc], worst_val['L'][perc], low_good=True)
-                    html_report_lines += ['<td align="right"'+bottom_edge+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+'L'+str(perc)+':</font></td><td bgcolor="'+cell_color+'" align="right"'+edges+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+sp+'('+str(L[perc][ass_i])+')'+'</font></td>']
+                    html_report_lines += ['<td align="center"'+bottom_edge+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+'L'+str(perc)+':</font></td><td bgcolor="'+cell_color+'" align="right"'+edges+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+sp+'('+str(L[perc][ass_i])+')'+'</font></td>']
 
                 # Summary Stats
-                html_report_lines += ['<td align="right"'+bottom_edge+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>']
+                html_report_lines += ['<td align="center"'+bottom_edge+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>']
                 if bucket >= 1000:
                     html_report_lines += ['<nobr>'+'&gt;= '+'10'+'<sup>'+str(int(math.log(bucket,10)+0.1))+'</sup>'+'</nobr>']
                 else:
@@ -883,7 +909,7 @@ class kb_assembly_compare:
 
                 cell_color = get_cell_color (cumulative_len_stats[ass_i][bucket], best_val['cumulative_len_stats'][bucket], worst_val['cumulative_len_stats'][bucket])
                 html_report_lines += ['<td bgcolor="'+cell_color+'" align="right"'+edges+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+str(cumulative_len_stats[ass_i][bucket])+'</font></td>']
-                if ass_i > 0:
+                if sub_i > 0:
                     html_report_lines += ['</tr>']
 
             # Hist
