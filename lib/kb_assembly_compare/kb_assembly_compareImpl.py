@@ -514,7 +514,8 @@ class kb_assembly_compare:
         text_color = "#606060"
         fig = plt.figure()
         fig.set_size_inches(img_in_width, img_in_height)
-        #ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
+        ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
+        #ax = fig.axes[0]
         """
         # Let's turn off visibility of all tic labels and boxes here
         for ax in fig.axes:
@@ -527,7 +528,6 @@ class kb_assembly_compare:
             ax.spines['left'].set_visible(False)    # left axis line
             ax.spines['right'].set_visible(False)   # right axis line
         """
-        ax = fig.axes[0]
         ax.grid(True)
         ax.set_title (plot_name_desc)
         #ax.text (x_margin, 1.0-(y_margin), plot_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=title_fontsize, zorder=1)
@@ -603,7 +603,8 @@ class kb_assembly_compare:
         text_color = "#606060"
         fig = plt.figure()
         fig.set_size_inches(img_in_width, img_in_height)
-        #ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
+        ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
+        #ax = fig.axes[0]
         """
         # Let's turn off visibility of all tic labels and boxes here
         for ax in fig.axes:
@@ -616,7 +617,6 @@ class kb_assembly_compare:
             ax.spines['left'].set_visible(False)    # left axis line
             ax.spines['right'].set_visible(False)   # right axis line
         """
-        ax = fig.axes[0]
         ax.grid(True)
         ax.set_title (plot_name_desc)
         #ax.text (x_margin, 1.0-(y_margin), plot_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=title_fontsize, zorder=1)
@@ -687,7 +687,8 @@ class kb_assembly_compare:
             text_color = "#606060"
             fig = plt.figure()
             fig.set_size_inches(img_in_width, img_in_height)
-            #ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
+            ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
+            #ax = fig.axes[0]
             """
             # Let's turn off visibility of all tic labels and boxes here
             for ax in fig.axes:
@@ -700,7 +701,6 @@ class kb_assembly_compare:
                 ax.spines['left'].set_visible(False)    # left axis line
                 ax.spines['right'].set_visible(False)   # right axis line
             """
-            ax = fig.axes[0]
             ax.grid(True)
             ax.set_xlim = [0, max_len + hist_binwidth]
             ax.set_ylim = [0, top_hist_cnt + top_hist_cnt // 10]
