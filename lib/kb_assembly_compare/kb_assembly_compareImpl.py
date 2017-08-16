@@ -578,8 +578,7 @@ class kb_assembly_compare:
         # upload PNG
         try:
             upload_ret = dfuClient.file_to_shock({'file_path': output_png_file_path,
-                                                  'make_handle': 0,
-                                                  'pack': 'zip'})
+                                                  'make_handle': 0})
             file_links.append({'shock_id': upload_ret['shock_id'],
                                'name': png_file,
                                'label': plot_name_desc+' PNG'
@@ -590,8 +589,7 @@ class kb_assembly_compare:
         # upload PDF
         try:
             upload_ret = dfuClient.file_to_shock({'file_path': output_pdf_file_path,
-                                                  'make_handle': 0,
-                                                  'pack': 'zip'})
+                                                  'make_handle': 0})
             file_links.append({'shock_id': upload_ret['shock_id'],
                                'name': pdf_file,
                                'label': plot_name_desc+' PDF'
@@ -659,8 +657,7 @@ class kb_assembly_compare:
         # upload PNG
         try:
             upload_ret = dfuClient.file_to_shock({'file_path': output_png_file_path,
-                                                  'make_handle': 0,
-                                                  'pack': 'zip'})
+                                                  'make_handle': 0})
             file_links.append({'shock_id': upload_ret['shock_id'],
                                'name': png_file,
                                'label': plot_name_desc+' PNG'
@@ -671,8 +668,7 @@ class kb_assembly_compare:
         # upload PDF
         try:
             upload_ret = dfuClient.file_to_shock({'file_path': output_pdf_file_path,
-                                                  'make_handle': 0,
-                                                  'pack': 'zip'})
+                                                  'make_handle': 0})
             file_links.append({'shock_id': upload_ret['shock_id'],
                                'name': pdf_file,
                                'label': plot_name_desc+' PDF'
@@ -689,6 +685,8 @@ class kb_assembly_compare:
             hist_lens_png_files.append([])
             hist_lens_pdf_files.append([])
             for hist_i,top_cnt in enumerate(top_hist_cnt):
+                if len(hist_vals[ass_i][hist_i]) == 0:
+                    continue
                 long_len = max_len
                 if hist_i < len(top_hist_cnt)-1:
                     long_len = max_hist_val_accept[hist_i]
@@ -747,8 +745,7 @@ class kb_assembly_compare:
                 # upload PNG
                 try:
                     upload_ret = dfuClient.file_to_shock({'file_path': output_png_file_path,
-                                                          'make_handle': 0,
-                                                          'pack': 'zip'})
+                                                          'make_handle': 0})
                     file_links.append({'shock_id': upload_ret['shock_id'],
                                        'name': png_file,
                                        'label': plot_name_desc+' PNG'
@@ -759,8 +756,7 @@ class kb_assembly_compare:
                 # upload PDF
                 try:
                     upload_ret = dfuClient.file_to_shock({'file_path': output_pdf_file_path,
-                                                          'make_handle': 0,
-                                                          'pack': 'zip'})
+                                                          'make_handle': 0})
                     file_links.append({'shock_id': upload_ret['shock_id'],
                                        'name': pdf_file,
                                        'label': plot_name_desc+' PDF'
@@ -774,7 +770,7 @@ class kb_assembly_compare:
         ##
         self.log (console, "CREATING HTML REPORT")
         def get_cell_color (val, best, worst, low_good=False):
-            self.log (console, "VAL: "+str(val)+" BEST: "+str(best)+" WORST: "+str(worst))  # DEBUG
+            #self.log (console, "VAL: "+str(val)+" BEST: "+str(best)+" WORST: "+str(worst))  # DEBUG
 
             if best == worst:
                 return '#ffffff'
@@ -803,30 +799,30 @@ class kb_assembly_compare:
             if low_good:
                 if val < mid:
                     rescaled_val = int(0.5 + top * (val-best) / (mid-best))
-                    self.log (console, "A, MID: "+str(mid)+" RESCALED_VAL: "+str(rescaled_val))  # DEBUG
+                    #self.log (console, "A, MID: "+str(mid)+" RESCALED_VAL: "+str(rescaled_val))  # DEBUG
                     r = val_color_map[base_intensity + rescaled_val]
                     g = val_color_map[base_intensity + rescaled_val]
                     b = 'ff'
                 else:
                     rescaled_val = int(0.5 + top * (val-worst) / (mid-worst))
-                    self.log (console, "B, MID: "+str(mid)+" RESCALED_VAL: "+str(rescaled_val))  # DEBUG
+                    #self.log (console, "B, MID: "+str(mid)+" RESCALED_VAL: "+str(rescaled_val))  # DEBUG
                     r = 'ff'
                     g = val_color_map[base_intensity + rescaled_val]
                     b = val_color_map[base_intensity + rescaled_val]
             else:
                 if val > mid:
                     rescaled_val = int(0.5 + top * (val-best) / (mid-best))
-                    self.log (console, "C, MID: "+str(mid)+" RESCALED_VAL: "+str(rescaled_val))  # DEBUG
+                    #self.log (console, "C, MID: "+str(mid)+" RESCALED_VAL: "+str(rescaled_val))  # DEBUG
                     r = val_color_map[base_intensity + rescaled_val]
                     g = val_color_map[base_intensity + rescaled_val]
                     b = 'ff'
                 else:
                     rescaled_val = int(0.5 + top * (val-worst) / (mid-worst))
-                    self.log (console, "D, MID: "+str(mid)+" RESCALED_VAL: "+str(rescaled_val))  # DEBUG
+                    #self.log (console, "D, MID: "+str(mid)+" RESCALED_VAL: "+str(rescaled_val))  # DEBUG
                     r = 'ff'
                     g = val_color_map[base_intensity + rescaled_val]
                     b = val_color_map[base_intensity + rescaled_val]
-            self.log (console, "RGB: "+r+g+b)  # DEBUG
+            #self.log (console, "RGB: "+r+g+b)  # DEBUG
             return '#'+r+g+b
 
         subtab_N_rows = 6
