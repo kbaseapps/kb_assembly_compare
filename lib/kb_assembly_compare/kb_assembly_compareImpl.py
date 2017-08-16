@@ -544,7 +544,7 @@ class kb_assembly_compare:
         ax.grid(True)
         ax.set_title (plot_name_desc)
         ax.set_xlabel ('sorted contig order (longest to shortest)')
-        ax.set_xlabel ('sum of lengths of sorted contigs')
+        ax.set_ylabel ('sum of sorted contig lengths (Mbp)')
         plt.tight_layout()
         #ax.text (x_margin, 1.0-(y_margin), plot_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=title_fontsize, zorder=1)
 
@@ -690,6 +690,9 @@ class kb_assembly_compare:
         # Hist plots for each assembly
         hist_lens_png_files = []
         hist_lens_pdf_files = []
+        units            = ['Kbp', 'Kbp', '100 Kbp']
+        val_scale_adjust = [1000, 1000, 100000]
+        img_in_width     = [3.0, 3.0, 5.0]
         for ass_i,ass_name in enumerate(assembly_names):
             hist_lens_png_files.append([])
             hist_lens_pdf_files.append([])
@@ -705,14 +708,13 @@ class kb_assembly_compare:
                 img_dpi = 200
                 img_units = "in"
                 #img_in_width  = 6.0
-                img_in_width  = 4.0
                 img_in_height = 3.0
                 x_margin = 0.01
                 y_margin = 0.01
                 title_fontsize = 12
                 text_color = "#606060"
                 fig = plt.figure()
-                fig.set_size_inches(img_in_width, img_in_height)
+                fig.set_size_inches(img_in_width[hist_i], img_in_height)
                 ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
                 #ax = fig.axes[0]
                 """
@@ -729,12 +731,12 @@ class kb_assembly_compare:
                 """
                 ax.grid(True)
                 min_hist_bin_beg = 0
-                max_hist_bin_end = long_len
-                binwidth = hist_binwidth[hist_i]
+                max_hist_bin_end = float(long_len) / val_scale_adjust[hist_i]
+                binwidth = float (hist_binwidth[hist_i]) / val_scale_adjust[hist_i]
                 ax.set_xlim ([0, max_hist_bin_end + binwidth])
                 ax.set_ylim ([0, top_hist_cnt[hist_i] + top_hist_cnt[hist_i] // 10])
-                ax.set_xlabel ('contig len bin')
-                ax.set_ylabel ('num contigs')
+                ax.set_xlabel ('contig len bin ('+units+')')
+                ax.set_ylabel ('# contigs')
                 plt.tight_layout()
                 #ax.set_title (plot_name_desc)  # given in table column header
 
@@ -742,7 +744,12 @@ class kb_assembly_compare:
                 #min_log10_len = 0
                 ##max_log10_len  # set above
                 #log10_binwidth = 0.1
-                plt.hist(hist_vals[ass_i][hist_i], log=False, bins=range(min_hist_bin_beg, max_hist_bin_end + binwidth, binwidth))
+
+                #plt.hist(hist_vals[ass_i][hist_i], log=False, bins=range(min_hist_bin_beg, max_hist_bin_end + binwidth, binwidth))
+                scaled_hist_vals = []
+                for val in hist_vals[ass_i][hist_i]:
+                    val.append(float(val) / val_scale_adjust[hist_i])
+                plt.hist(scaled_hist_vals, log=False, bins=np.arange(min_hist_bin_beg, max_hist_bin_end + binwidth, binwidth))
 
                 # save plot
                 self.log (console, "SAVING PLOT "+plot_name_desc)
