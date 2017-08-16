@@ -735,7 +735,7 @@ class kb_assembly_compare:
                 binwidth = float (hist_binwidth[hist_i]) / val_scale_adjust[hist_i]
                 ax.set_xlim ([0, max_hist_bin_end + binwidth])
                 ax.set_ylim ([0, top_hist_cnt[hist_i] + top_hist_cnt[hist_i] // 10])
-                ax.set_xlabel ('contig len bin ('+units+')')
+                ax.set_xlabel ('contig length bin ('+units[hist_i]+')')
                 ax.set_ylabel ('# contigs')
                 plt.tight_layout()
                 #ax.set_title (plot_name_desc)  # given in table column header
