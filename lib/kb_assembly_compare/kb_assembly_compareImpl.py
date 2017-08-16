@@ -514,8 +514,9 @@ class kb_assembly_compare:
 
         # Cumulative len plot
         plot_name = "cumulative_len_plot"
-        plot_name_desc = "Cumulative Length (in bp)"
+        plot_name_desc = "Cumulative Length (in Mbp)"
         self.log (console, "GENERATING PLOT "+plot_name_desc)
+        val_scale_shift = 1000000.0  # to make Mbp
         img_dpi = 200
         img_units = "in"
         img_in_width  = 6.0
@@ -542,6 +543,9 @@ class kb_assembly_compare:
         """
         ax.grid(True)
         ax.set_title (plot_name_desc)
+        ax.set_xlabel ('sorted contig order (longest to shortest)')
+        ax.set_xlabel ('sum of lengths of sorted contigs')
+        plt.tight_layout()
         #ax.text (x_margin, 1.0-(y_margin), plot_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=title_fontsize, zorder=1)
 
         # build x and y coord lists
@@ -550,7 +554,8 @@ class kb_assembly_compare:
             y_coords = []
             for val_i,val in enumerate(cumulative_lens[ass_i]):
                 x_coords.append(val_i+1)
-                y_coords.append(val)
+                #y_coords.append(val)
+                y_coords.append(float(val) / val_scale_shift)
             plt.plot(x_coords, y_coords, lw=2)
 
         """
@@ -601,8 +606,9 @@ class kb_assembly_compare:
 
         # Sorted Contig len plot
         plot_name = "sorted_contig_lengths"
-        plot_name_desc = "Sorted Contig Lengths (in bp)"
+        plot_name_desc = "Sorted Contig Lengths (in Mbp)"
         self.log (console, "GENERATING PLOT "+plot_name_desc)
+        val_scale_shift = 1000000.0  # to make Mbp
         img_dpi = 200
         img_units = "in"
         img_in_width  = 6.0
@@ -629,6 +635,9 @@ class kb_assembly_compare:
         """
         ax.grid(True)
         ax.set_title (plot_name_desc)
+        ax.set_xlabel ('sum of sorted contig lengths (Mbp)')
+        ax.set_ylabel ('sorted contig lengths (Mbp)')
+        plt.tight_layout()
         #ax.text (x_margin, 1.0-(y_margin), plot_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=title_fontsize, zorder=1)
 
         # build x and y coord lists
@@ -638,11 +647,11 @@ class kb_assembly_compare:
             y_coords = []
             running_sum = 0
             for val_i,val in enumerate(lens[ass_i]):
-                x_coords.append(running_sum + mini_delta)
-                y_coords.append(val)
+                x_coords.append(float(running_sum + mini_delta) / val_scale_shift)
+                y_coords.append(float(val) / val_scale_shift)
                 running_sum += val
-                x_coords.append(running_sum)
-                y_coords.append(val)
+                x_coords.append(float(running_sum) / val_scale_shift)
+                y_coords.append(float(val) / val_scale_shift)
             plt.plot(x_coords, y_coords, lw=2)
 
         # save plot
@@ -695,7 +704,8 @@ class kb_assembly_compare:
                 self.log (console, "GENERATING PLOT for "+ass_name+" "+plot_name_desc)
                 img_dpi = 200
                 img_units = "in"
-                img_in_width  = 6.0
+                #img_in_width  = 6.0
+                img_in_width  = 4.0
                 img_in_height = 3.0
                 x_margin = 0.01
                 y_margin = 0.01
@@ -723,6 +733,9 @@ class kb_assembly_compare:
                 binwidth = hist_binwidth[hist_i]
                 ax.set_xlim ([0, max_hist_bin_end + binwidth])
                 ax.set_ylim ([0, top_hist_cnt[hist_i] + top_hist_cnt[hist_i] // 10])
+                ax.set_xlabel ('contig len bin')
+                ax.set_ylabel ('num contigs')
+                plt.tight_layout()
                 #ax.set_title (plot_name_desc)  # given in table column header
 
                 # plot hist
@@ -875,9 +888,9 @@ class kb_assembly_compare:
         html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'NUM<br>CONTIGS'+'</font></td>']
         html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'SUM<br>LENGTH<br>(bp)'+'</font></td>']
         # hists
-        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'" colspan='+str(hist_colspan)+'><font color="'+text_color+'" size='+text_fontsize+'>'+'Contig Length Histogram<br>(0 - 10Kbp)'+'</font></td>']
-        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'" colspan='+str(hist_colspan)+'><font color="'+text_color+'" size='+text_fontsize+'>'+'Contig Length Histogram<br>(10Kbp - 100Kbp)'+'</font></td>']
-        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'" colspan='+str(hist_colspan)+'><font color="'+text_color+'" size='+text_fontsize+'>'+'Contig Length Histogram<br>(100Kbp+)'+'</font></td>']
+        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'" colspan='+str(1)+'><font color="'+text_color+'" size='+text_fontsize+'>'+'Contig Length Histogram<br>(1bp <= len < 10Kbp)'+'</font></td>']
+        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'" colspan='+str(1)+'><font color="'+text_color+'" size='+text_fontsize+'>'+'Contig Length Histogram<br>(10Kbp <= len < 100Kbp)'+'</font></td>']
+        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'" colspan='+str(1)+'><font color="'+text_color+'" size='+text_fontsize+'>'+'Contig Length Histogram<br>(len >= 100Kbp)'+'</font></td>']
         html_report_lines += ['</tr>']
 
         # report stats
@@ -928,8 +941,11 @@ class kb_assembly_compare:
                     html_report_lines += ['</tr>']
                 else:
                     # Hist
-                    for hist_lens_png_file in hist_lens_png_files[ass_i]:
-                        html_report_lines += ['<td valign=top align=left rowspan='+str(subtab_N_rows)+' colspan=1'+'><img src="'+hist_lens_png_file+'" height='+str(hist_img_height)+'></td>']
+                    hist_edge = ' style="border-bottom:solid 2px '+border_body_color+'"'
+                    for hist_i,hist_lens_png_file in enumerate(hist_lens_png_files[ass_i]):
+                        if hist_i == len(hist_lens_png_files[ass_i])-1:
+                            hist_edge = ' style="border-right:solid 2px '+border_body_color+'; border-bottom:solid 2px '+border_body_color+'"'
+                        html_report_lines += ['<td valign=top align=left rowspan='+str(subtab_N_rows)+' colspan=1'+hist_edge+'><img src="'+hist_lens_png_file+'" height='+str(hist_img_height)+'></td>']
                     html_report_lines += ['</tr>']
 
         html_report_lines += ['</table>']
