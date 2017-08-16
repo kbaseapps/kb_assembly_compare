@@ -875,9 +875,9 @@ class kb_assembly_compare:
         html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'NUM<br>CONTIGS'+'</font></td>']
         html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'SUM<br>LENGTH<br>(bp)'+'</font></td>']
         # hists
-        html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'" colspan='+str(hist_colspan)+'><font color="'+text_color+'" size='+text_fontsize+'>'+'Contig Length Histogram<br>(0 - 10Kbp)'+'</font></td>']
-        html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'" colspan='+str(hist_colspan)+'><font color="'+text_color+'" size='+text_fontsize+'>'+'Contig Length Histogram<br>(10Kbp - 100Kbp)'+'</font></td>']
-        html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'" colspan='+str(hist_colspan)+'><font color="'+text_color+'" size='+text_fontsize+'>'+'Contig Length Histogram (100Kbp+)'+'</font></td>']
+        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'" colspan='+str(hist_colspan)+'><font color="'+text_color+'" size='+text_fontsize+'>'+'Contig Length Histogram<br>(0 - 10Kbp)'+'</font></td>']
+        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'" colspan='+str(hist_colspan)+'><font color="'+text_color+'" size='+text_fontsize+'>'+'Contig Length Histogram<br>(10Kbp - 100Kbp)'+'</font></td>']
+        html_report_lines += ['<td align="center" style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'" colspan='+str(hist_colspan)+'><font color="'+text_color+'" size='+text_fontsize+'>'+'Contig Length Histogram<br>(100Kbp+)'+'</font></td>']
         html_report_lines += ['</tr>']
 
         # report stats
@@ -924,13 +924,13 @@ class kb_assembly_compare:
 
                 cell_color = get_cell_color (cumulative_len_stats[ass_i][bucket], best_val['cumulative_len_stats'][bucket], worst_val['cumulative_len_stats'][bucket])
                 html_report_lines += ['<td bgcolor="'+cell_color+'" align="right"'+edges+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+str(cumulative_len_stats[ass_i][bucket])+'</font></td>']
-#                if sub_i > 0:
-#                    html_report_lines += ['</tr>']
-
-            # Hist
-            for hist_lens_png_file in hist_lens_png_files[ass_i]:
-                html_report_lines += ['<td valign=top align=left rowspan='+str(subtab_N_rows)+' colspan=1'+'><img src="'+hist_lens_png_file+'" height='+str(hist_img_height)+'></td>']
-            html_report_lines += ['</tr>']
+                if sub_i > 0:
+                    html_report_lines += ['</tr>']
+                else:
+                    # Hist
+                    for hist_lens_png_file in hist_lens_png_files[ass_i]:
+                        html_report_lines += ['<td valign=top align=left rowspan='+str(subtab_N_rows)+' colspan=1'+'><img src="'+hist_lens_png_file+'" height='+str(hist_img_height)+'></td>']
+                    html_report_lines += ['</tr>']
 
         html_report_lines += ['</table>']
         html_report_lines += ['</body>']
