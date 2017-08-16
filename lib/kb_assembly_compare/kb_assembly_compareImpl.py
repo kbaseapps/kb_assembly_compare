@@ -748,7 +748,7 @@ class kb_assembly_compare:
                 #plt.hist(hist_vals[ass_i][hist_i], log=False, bins=range(min_hist_bin_beg, max_hist_bin_end + binwidth, binwidth))
                 scaled_hist_vals = []
                 for val in hist_vals[ass_i][hist_i]:
-                    val.append(float(val) / val_scale_adjust[hist_i])
+                    scaled_hist_vals.append(float(val) / val_scale_adjust[hist_i])
                 plt.hist(scaled_hist_vals, log=False, bins=np.arange(min_hist_bin_beg, max_hist_bin_end + binwidth, binwidth))
 
                 # save plot
