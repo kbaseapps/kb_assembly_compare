@@ -400,7 +400,9 @@ class kb_assembly_compare:
             hist_vals = []
             hist_cnt_by_bin = []  # just to get shared heights for separate hist graphs
             top_hist_cnt = [0, 0, 0]
-            hist_binwidth = [500, 5000, 20000]
+            #hist_binwidth = [500, 5000, 20000]
+            long_contig_nbins = 50
+            hist_binwidth = [500, 5000, (max_len // long_contig_nbins)]
             min_hist_val_accept = [0, 10000, 100000]
             max_hist_val_accept = [10000, 100000, 100000000000000000000]
             #log_lens = []
@@ -511,6 +513,84 @@ class kb_assembly_compare:
         #### STEP 5: Make figures with matplotlib
         ##
         file_links = [] 
+        shared_img_in_height = 4.0
+
+        # Key
+        plot_name = "key_plot"
+        plot_name_desc = "KEY"
+        self.log (console, "GENERATING PLOT "+plot_name_desc)
+        img_dpi = 200
+        img_units = "in"
+        img_in_width  = 2.0
+        img_in_height = shared_img_in_height
+        x_margin = 0.01
+        y_margin = 0.01
+        title_fontsize = 12
+        text_color = "#606060"
+        text_fontsize = 9
+        fig = plt.figure()
+        fig.set_size_inches(img_in_width, img_in_height)
+        ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
+        #ax = fig.axes[0]
+        # Let's turn off visibility of all tic labels and boxes here
+        for ax in fig.axes:
+            ax.xaxis.set_visible(False)  # remove axis labels and tics
+            ax.yaxis.set_visible(False)
+            for t in ax.get_xticklabels()+ax.get_yticklabels():  # remove tics
+                t.set_visible(False)
+            ax.spines['top'].set_visible(False)     # Get rid of top axis line
+            ax.spines['bottom'].set_visible(False)  # bottom axis line
+            ax.spines['left'].set_visible(False)    # left axis line
+            ax.spines['right'].set_visible(False)   # right axis line
+        #ax.grid(True)
+        ax.set_title (plot_name_desc)
+        #ax.set_xlabel ('sorted contig order (longest to shortest)')
+        #ax.set_ylabel ('sum of contig lengths (Mbp)')
+        plt.tight_layout()
+
+        # build x and y coord lists
+        total_ass = len(assembly_names)
+        for ass_i,ass_name in enumerate(assembly_names):
+            x0 = 1
+            x1 = 2
+            x_coords = [x0, x1]
+            y_pos = total_ass - ass_i
+            y_coords = [y_pos, y_pos]
+            plt.plot(x_coords, y_coords, lw=2)
+            ax.text (x0+x_margin, y_pos+y_margin, ass_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=text_fontsize, zorder=1)
+
+        # save plot
+        self.log (console, "SAVING PLOT "+plot_name_desc)
+        key_png_file = png_file = plot_name+".png"
+        key_pdf_file = pdf_file = plot_name+".pdf"
+        output_png_file_path = os.path.join (html_output_dir, png_file)
+        output_pdf_file_path = os.path.join (html_output_dir, pdf_file)
+        fig.savefig (output_png_file_path, dpi=img_dpi)
+        fig.savefig (output_pdf_file_path, format='pdf')
+
+        # upload PNG
+        try:
+            upload_ret = dfuClient.file_to_shock({'file_path': output_png_file_path,
+                                                  'make_handle': 0})
+            file_links.append({'shock_id': upload_ret['shock_id'],
+                               'name': png_file,
+                               'label': plot_name_desc+' PNG'
+                               }
+                              )
+        except:
+            raise ValueError ('Logging exception loading png_file '+png_file+' to shock')
+        # upload PDF
+        try:
+            upload_ret = dfuClient.file_to_shock({'file_path': output_pdf_file_path,
+                                                  'make_handle': 0})
+            file_links.append({'shock_id': upload_ret['shock_id'],
+                               'name': pdf_file,
+                               'label': plot_name_desc+' PDF'
+                               }
+                              )
+        except:
+            raise ValueError ('Logging exception loading pdf_file '+pdf_file+' to shock')
+
 
         # Cumulative len plot
         plot_name = "cumulative_len_plot"
@@ -519,8 +599,8 @@ class kb_assembly_compare:
         val_scale_shift = 1000000.0  # to make Mbp
         img_dpi = 200
         img_units = "in"
-        img_in_width  = 6.0
-        img_in_height = 3.0
+        img_in_width  = 4.0
+        img_in_height = shared_img_in_height
         x_margin = 0.01
         y_margin = 0.01
         title_fontsize = 12
@@ -544,7 +624,7 @@ class kb_assembly_compare:
         ax.grid(True)
         ax.set_title (plot_name_desc)
         ax.set_xlabel ('sorted contig order (longest to shortest)')
-        ax.set_ylabel ('sum of sorted contig lengths (Mbp)')
+        ax.set_ylabel ('sum of contig lengths (Mbp)')
         plt.tight_layout()
         #ax.text (x_margin, 1.0-(y_margin), plot_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=title_fontsize, zorder=1)
 
@@ -612,7 +692,7 @@ class kb_assembly_compare:
         img_dpi = 200
         img_units = "in"
         img_in_width  = 6.0
-        img_in_height = 3.0
+        img_in_height = shared_img_in_height
         x_margin = 0.01
         y_margin = 0.01
         title_fontsize = 12
@@ -692,7 +772,7 @@ class kb_assembly_compare:
         hist_lens_pdf_files = []
         units            = ['Kbp', 'Kbp', '100 Kbp']
         val_scale_adjust = [1000, 1000, 100000]
-        img_in_width     = [3.0, 3.0, 5.0]
+        img_in_width     = [3.0, 3.0, 7.0]
         for ass_i,ass_name in enumerate(assembly_names):
             hist_lens_png_files.append([])
             hist_lens_pdf_files.append([])
@@ -877,12 +957,25 @@ class kb_assembly_compare:
         #html_report_lines += ['<tr><td valign=top align=left rowspan=1><div class="vertical-text_title"><div class="vertical-text__inner_title"><font color="'+text_color+'">'+label+'</font></div></div></td>']
 
         html_report_lines += ['<table cellpadding='+str(cellpadding)+' cellspacing='+str(cellspacing)+' border='+str(border)+'>']
-        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(non_hist_colspan)+'><img src="'+cumulative_lens_png_file+'" height='+str(big_img_height)+'></td>']
+        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(1)+'><img src="'+key_png_file+'" height='+str(big_img_height)+'></td>']
+        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(non_hist_colspan-1)+'><img src="'+cumulative_lens_png_file+'" height='+str(big_img_height)+'></td>']
         html_report_lines += ['<td valign=top align=left rowspan=1 colspan='+str(hist_colspan)+'><img src="'+sorted_lens_png_file+'" height='+str(big_img_height)+'></td></tr>']
 
+        # key
+        best = 10
+        worst = 1
+        html_report_lines += ['<tr><td>'+sp+'</td></tr>']
+        html_report_lines += ['<tr><td><table cellpadding=5 cellspacing=0 border=1><tr>']
+        html_report_lines += ['<td bgcolor="'+get_cell_color(best, best, worst)+'">'+'BEST'+'</td>']
+        for i in [9,8,7,6]:
+            html_report_lines += ['<td bgcolor="'+get_cell_color(i, best, worst)+'">'+sp+'</td>']
+        html_report_lines += ['<td bgcolor="white">'+sp+'</td>']
+        for i in [5,4,3,2]:
+            html_report_lines += ['<td bgcolor="'+get_cell_color(i, best, worst)+'">'+sp+'</td>']
+        html_report_lines += ['<td bgcolor="'+get_cell_color(worst, best, worst)+'">'+'WORST'+'</td>']
+        html_report_lines += ['</tr><table></td></tr>']
+
         # header
-        html_report_lines += ['<tr><td>'+sp+'</td></tr>']
-        html_report_lines += ['<tr><td>'+sp+'</td></tr>']
         html_report_lines += ['<tr bgcolor="'+head_color+'">']
         # name
         html_report_lines += ['<td style="border-right:solid 2px '+border_head_color+'; border-bottom:solid 2px '+border_head_color+'"><font color="'+text_color+'" size='+text_fontsize+' align="left">'+'ASSEMBLY'+'</font></td>']
