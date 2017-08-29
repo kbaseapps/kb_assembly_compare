@@ -51,7 +51,7 @@ class kb_assembly_compare:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "0.0.1"
+    VERSION = "1.0.0"
     GIT_URL = "https://github.com/dcchivian/kb_assembly_compare"
     GIT_COMMIT_HASH = "751d420f0c2e542922983f91387e8536bd4bb373"
 
@@ -401,7 +401,7 @@ class kb_assembly_compare:
             hist_cnt_by_bin = []  # just to get shared heights for separate hist graphs
             top_hist_cnt = [0, 0, 0]
             #hist_binwidth = [500, 5000, 20000]
-            long_contig_nbins = 50
+            long_contig_nbins = 60
             hist_binwidth = [500, 5000, (max_len // long_contig_nbins)]
             min_hist_val_accept = [0, 10000, 100000]
             max_hist_val_accept = [10000, 100000, 100000000000000000000]
@@ -514,6 +514,7 @@ class kb_assembly_compare:
         ##
         file_links = [] 
         shared_img_in_height = 4.0
+        total_ass = len(assembly_names)
 
         # Key
         plot_name = "key_plot"
@@ -521,13 +522,13 @@ class kb_assembly_compare:
         self.log (console, "GENERATING PLOT "+plot_name_desc)
         img_dpi = 200
         img_units = "in"
-        img_in_width  = 2.0
-        img_in_height = shared_img_in_height
+        img_in_width  = 6.0
+        img_in_height = total_ass / 5.0 
         x_margin = 0.01
         y_margin = 0.01
         title_fontsize = 12
         text_color = "#606060"
-        text_fontsize = 9
+        text_fontsize = 10
         fig = plt.figure()
         fig.set_size_inches(img_in_width, img_in_height)
         ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
@@ -549,12 +550,12 @@ class kb_assembly_compare:
         plt.tight_layout()
 
         # build x and y coord lists
-        total_ass = len(assembly_names)
+        spacing = 1.0 / (total_ass+2)
         for ass_i,ass_name in enumerate(assembly_names):
             x0 = 1
             x1 = 2
             x_coords = [x0, x1]
-            y_pos = total_ass - ass_i
+            y_pos = total_ass - spacing*(ass_i + 1)
             y_coords = [y_pos, y_pos]
             plt.plot(x_coords, y_coords, lw=2)
             ax.text (x0+x_margin, y_pos+y_margin, ass_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=text_fontsize, zorder=1)
@@ -599,7 +600,7 @@ class kb_assembly_compare:
         val_scale_shift = 1000000.0  # to make Mbp
         img_dpi = 200
         img_units = "in"
-        img_in_width  = 4.0
+        img_in_width  = 6.0
         img_in_height = shared_img_in_height
         x_margin = 0.01
         y_margin = 0.01
@@ -793,6 +794,7 @@ class kb_assembly_compare:
                 y_margin = 0.01
                 title_fontsize = 12
                 text_color = "#606060"
+                hist_color = "skyblue"
                 fig = plt.figure()
                 fig.set_size_inches(img_in_width[hist_i], img_in_height)
                 ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
@@ -829,7 +831,7 @@ class kb_assembly_compare:
                 scaled_hist_vals = []
                 for val in hist_vals[ass_i][hist_i]:
                     scaled_hist_vals.append(float(val) / val_scale_adjust[hist_i])
-                plt.hist(scaled_hist_vals, log=False, bins=np.arange(min_hist_bin_beg, max_hist_bin_end + binwidth, binwidth))
+                plt.hist(scaled_hist_vals, color=hist_color, log=False, bins=np.arange(min_hist_bin_beg, max_hist_bin_end + 3*binwidth, binwidth))
 
                 # save plot
                 self.log (console, "SAVING PLOT "+plot_name_desc)
@@ -957,7 +959,7 @@ class kb_assembly_compare:
         #html_report_lines += ['<tr><td valign=top align=left rowspan=1><div class="vertical-text_title"><div class="vertical-text__inner_title"><font color="'+text_color+'">'+label+'</font></div></div></td>']
 
         html_report_lines += ['<table cellpadding='+str(cellpadding)+' cellspacing='+str(cellspacing)+' border='+str(border)+'>']
-        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(1)+'><img src="'+key_png_file+'" height='+str(big_img_height)+'></td>']
+        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(non_hist_colspan+hist_colspan)+'><img src="'+key_png_file+'></td></tr>']
         html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(non_hist_colspan-1)+'><img src="'+cumulative_lens_png_file+'" height='+str(big_img_height)+'></td>']
         html_report_lines += ['<td valign=top align=left rowspan=1 colspan='+str(hist_colspan)+'><img src="'+sorted_lens_png_file+'" height='+str(big_img_height)+'></td></tr>']
 
@@ -965,12 +967,9 @@ class kb_assembly_compare:
         best = 10
         worst = 1
         html_report_lines += ['<tr><td>'+sp+'</td></tr>']
-        html_report_lines += ['<tr><td><table cellpadding=5 cellspacing=0 border=1><tr>']
+        html_report_lines += ['<tr><td colspan='+str(non_hist_colspan+hist_colspan)+'><table cellpadding=5 cellspacing=0 border=1><tr>']
         html_report_lines += ['<td bgcolor="'+get_cell_color(best, best, worst)+'">'+'BEST'+'</td>']
-        for i in [9,8,7,6]:
-            html_report_lines += ['<td bgcolor="'+get_cell_color(i, best, worst)+'">'+sp+'</td>']
-        html_report_lines += ['<td bgcolor="white">'+sp+'</td>']
-        for i in [5,4,3,2]:
+        for i in [9,8,7,6,5,4,3,2]:
             html_report_lines += ['<td bgcolor="'+get_cell_color(i, best, worst)+'">'+sp+'</td>']
         html_report_lines += ['<td bgcolor="'+get_cell_color(worst, best, worst)+'">'+'WORST'+'</td>']
         html_report_lines += ['</tr><table></td></tr>']
