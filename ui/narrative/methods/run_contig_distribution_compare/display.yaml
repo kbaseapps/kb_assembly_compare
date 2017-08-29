@@ -4,7 +4,9 @@
 name: Compare Assembled Contig Distributions
 tooltip: |
     View distributions of contig characteristics for different assemblies
-screenshots: []
+screenshots:
+    - compare_assembled_contig_dist_input_cell.png
+    - compare_assembled_contig_dist_output_report.png
 
 icon: kb-blue.png
 
