@@ -523,7 +523,7 @@ class kb_assembly_compare:
         img_dpi = 200
         img_units = "in"
         img_in_width  = 6.0
-        img_in_height = total_ass / 5.0 
+        img_in_height = float(total_ass) / 5.0 
         x_margin = 0.01
         y_margin = 0.01
         title_fontsize = 12
@@ -539,23 +539,23 @@ class kb_assembly_compare:
             ax.yaxis.set_visible(False)
             for t in ax.get_xticklabels()+ax.get_yticklabels():  # remove tics
                 t.set_visible(False)
-            ax.spines['top'].set_visible(False)     # Get rid of top axis line
-            ax.spines['bottom'].set_visible(False)  # bottom axis line
-            ax.spines['left'].set_visible(False)    # left axis line
-            ax.spines['right'].set_visible(False)   # right axis line
+            #ax.spines['top'].set_visible(False)     # Get rid of top axis line
+            #ax.spines['bottom'].set_visible(False)  # bottom axis line
+            #ax.spines['left'].set_visible(False)    # left axis line
+            #ax.spines['right'].set_visible(False)   # right axis line
         #ax.grid(True)
         ax.set_title (plot_name_desc)
         #ax.set_xlabel ('sorted contig order (longest to shortest)')
         #ax.set_ylabel ('sum of contig lengths (Mbp)')
-        plt.tight_layout()
+        #plt.tight_layout()
 
         # build x and y coord lists
-        spacing = 1.0 / (total_ass+2)
+        spacing = 1.0 / float(total_ass+3)
         for ass_i,ass_name in enumerate(assembly_names):
             x0 = 1
             x1 = 2
             x_coords = [x0, x1]
-            y_pos = total_ass - spacing*(ass_i + 1)
+            y_pos = total_ass - spacing*(ass_i + 2)
             y_coords = [y_pos, y_pos]
             plt.plot(x_coords, y_coords, lw=2)
             ax.text (x0+x_margin, y_pos+y_margin, ass_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=text_fontsize, zorder=1)
