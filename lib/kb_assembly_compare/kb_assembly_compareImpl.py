@@ -525,7 +525,7 @@ class kb_assembly_compare:
         #spacing = 1.0 / float(total_ass+3)
         spacing = 1.0
         img_in_width  = 6.0
-        img_in_height = 0.5 * (total_ass+3)
+        img_in_height = 0.5 * (total_ass)
         x_text_margin = 0.01
         y_text_margin = 0.01
         title_fontsize = 12
@@ -557,9 +557,9 @@ class kb_assembly_compare:
         x_indent = 0.1
         x_coords = [x0, x1]
         ax.set_xlim(x0-x_indent, x1+x_indent)
-        ax.set_ylim(-1, (total_ass+3) * spacing)
+        ax.set_ylim(-1*spacing, (total_ass+1)*spacing)
         for ass_i,ass_name in enumerate(assembly_names):
-            y_pos = total_ass - spacing*(ass_i + 2)
+            y_pos = (total_ass - ass_i) * spacing
             y_coords = [y_pos, y_pos]
             plt.plot(x_coords, y_coords, lw=2)
             ax.text (x0+x_text_margin, y_pos+y_text_margin, ass_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=text_fontsize, zorder=1)
@@ -934,7 +934,7 @@ class kb_assembly_compare:
         subtab_N_rows = 6
         hist_colspan = 3 # in cells
         non_hist_colspan = 7 # in cells
-        key_img_width = 400  # in pixels
+        key_img_width = 475  # in pixels
         big_img_height = 300  # in pixels
         hist_img_height = 200  # in pixels
         head_color = "#eeeeff"
