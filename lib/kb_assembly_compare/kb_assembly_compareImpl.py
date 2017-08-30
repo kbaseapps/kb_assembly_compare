@@ -528,8 +528,9 @@ class kb_assembly_compare:
         img_in_height = 0.5 * (total_ass)
         x_text_margin = 0.01
         y_text_margin = 0.01
-        title_fontsize = 11
-        text_color = "#606060"
+        title_fontsize = 12
+        #text_color = "#606060"
+        text_color = "#303030"
         text_fontsize = 10
         fig = plt.figure()
         fig.set_size_inches(img_in_width, img_in_height)
@@ -557,13 +558,15 @@ class kb_assembly_compare:
         x_indent = 0.1
         x_coords = [x0, x1]
         ax.set_xlim(x0-x_indent, x1+x_indent)
-        ax.set_ylim(-1*spacing, (total_ass+1)*spacing)
+        #ax.set_ylim(-1*spacing, (total_ass+1)*spacing)
+        ax.set_ylim(0, (total_ass+1)*spacing)
         for ass_i,ass_name in enumerate(assembly_names):
             y_pos = (total_ass - ass_i) * spacing
             y_coords = [y_pos, y_pos]
             plt.plot(x_coords, y_coords, lw=2)
             ax.text (x0+x_text_margin, y_pos+y_text_margin, ass_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=text_fontsize, zorder=1)
-        ax.text (0.5*(x0+x1), -1*spacing+y_text_margin, plot_name_desc, verticalalignment="bottom", horizontalalignment="center", color=text_color, fontsize=title_fontsize, zorder=2)
+        #ax.text (0.5*(x0+x1), -1*spacing+y_text_margin, plot_name_desc, verticalalignment="bottom", horizontalalignment="center", color=text_color, fontsize=title_fontsize, zorder=2)
+        ax.text (0.5*(x0+x1), 0+y_text_margin, plot_name_desc, verticalalignment="bottom", horizontalalignment="center", color=text_color, fontsize=title_fontsize, zorder=2)
 
         # save plot
         self.log (console, "SAVING PLOT "+plot_name_desc)
