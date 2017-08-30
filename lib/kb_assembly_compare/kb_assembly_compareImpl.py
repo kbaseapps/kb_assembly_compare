@@ -943,6 +943,7 @@ class kb_assembly_compare:
         text_fontsize = "2"
         text_color = '#606060'
         border_body_color = "#cccccc"
+        key_border_color = border_body_color
         base_cell_color = "#eeeeee"
         cellpadding = "3"
         cellspacing = "2"
@@ -973,7 +974,7 @@ class kb_assembly_compare:
         best = 10
         worst = 1
         html_report_lines += ['<tr><td>'+sp+'</td></tr>']
-        html_report_lines += ['<tr><td></td><td colspan='+str(non_hist_colspan+hist_colspan-1)+'><table cellpadding=5 cellspacing=0 border=1><tr>']
+        html_report_lines += ['<tr><td></td><td colspan='+str(non_hist_colspan+hist_colspan-1)+'><table cellpadding=5 cellspacing=0 border=1 bordercolor="'+key_border_color+'"><tr>']
         html_report_lines += ['<td bgcolor="'+get_cell_color(best, best, worst)+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'BEST'+'</font></td>']
         for i in [9,8,7,6,5,4,3,2]:
             html_report_lines += ['<td bgcolor="'+get_cell_color(i, best, worst)+'"><font size='+text_fontsize+'>'+sp+'</font></td>']
