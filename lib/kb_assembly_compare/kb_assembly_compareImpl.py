@@ -528,9 +528,9 @@ class kb_assembly_compare:
         img_in_height = 0.5 * (total_ass)
         x_text_margin = 0.01
         y_text_margin = 0.01
-        title_fontsize = 12
+        title_fontsize = 11
         text_color = "#606060"
-        text_fontsize = 9
+        text_fontsize = 10
         fig = plt.figure()
         fig.set_size_inches(img_in_width, img_in_height)
         ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
@@ -546,7 +546,7 @@ class kb_assembly_compare:
             #ax.spines['left'].set_visible(False)    # left axis line
             #ax.spines['right'].set_visible(False)   # right axis line
         #ax.grid(True)
-        ax.set_title (plot_name_desc)
+        #ax.set_title (plot_name_desc)
         #ax.set_xlabel ('sorted contig order (longest to shortest)')
         #ax.set_ylabel ('sum of contig lengths (Mbp)')
         #plt.tight_layout()
@@ -563,6 +563,7 @@ class kb_assembly_compare:
             y_coords = [y_pos, y_pos]
             plt.plot(x_coords, y_coords, lw=2)
             ax.text (x0+x_text_margin, y_pos+y_text_margin, ass_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=text_fontsize, zorder=1)
+        ax.text (0.5*(x0+x1), -1*spacing+y_text_margin, plot_name_desc, verticalalignment="bottom", horizontalalignment="center", color=text_color, fontsize=title_fontsize, zorder=2)
 
         # save plot
         self.log (console, "SAVING PLOT "+plot_name_desc)
@@ -942,6 +943,7 @@ class kb_assembly_compare:
         text_fontsize = "2"
         text_color = '#606060'
         border_body_color = "#cccccc"
+        key_border_color = border_body_color
         base_cell_color = "#eeeeee"
         cellpadding = "3"
         cellspacing = "2"
@@ -972,7 +974,7 @@ class kb_assembly_compare:
         best = 10
         worst = 1
         html_report_lines += ['<tr><td>'+sp+'</td></tr>']
-        html_report_lines += ['<tr><td></td><td colspan='+str(non_hist_colspan+hist_colspan-1)+'><table cellpadding=5 cellspacing=0 border=1><tr>']
+        html_report_lines += ['<tr><td></td><td colspan='+str(non_hist_colspan+hist_colspan-1)+'><table cellpadding=5 cellspacing=0 border=1 bordercolor="'+key_border_color+'"><tr>']
         html_report_lines += ['<td bgcolor="'+get_cell_color(best, best, worst)+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'BEST'+'</font></td>']
         for i in [9,8,7,6,5,4,3,2]:
             html_report_lines += ['<td bgcolor="'+get_cell_color(i, best, worst)+'"><font size='+text_fontsize+'>'+sp+'</font></td>']
