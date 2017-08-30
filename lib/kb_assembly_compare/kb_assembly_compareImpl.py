@@ -523,12 +523,12 @@ class kb_assembly_compare:
         img_dpi = 200
         img_units = "in"
         img_in_width  = 6.0
-        img_in_height = float(total_ass) / 5.0 
-        x_margin = 0.01
-        y_margin = 0.01
+        img_in_height = float(total_ass) / 2.0 
+        x_text_margin = 0.01
+        y_text_margin = 0.01
         title_fontsize = 12
         text_color = "#606060"
-        text_fontsize = 10
+        text_fontsize = 9
         fig = plt.figure()
         fig.set_size_inches(img_in_width, img_in_height)
         ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
@@ -551,14 +551,16 @@ class kb_assembly_compare:
 
         # build x and y coord lists
         spacing = 1.0 / float(total_ass+3)
+        x0 = 1
+        x1 = 2
+        x_indent = 0.1
+        x_coords = [x0, x1]
+        ax.set_xlim(x0-x_indent, x1+x_indent)
         for ass_i,ass_name in enumerate(assembly_names):
-            x0 = 1
-            x1 = 2
-            x_coords = [x0, x1]
             y_pos = total_ass - spacing*(ass_i + 2)
             y_coords = [y_pos, y_pos]
             plt.plot(x_coords, y_coords, lw=2)
-            ax.text (x0+x_margin, y_pos+y_margin, ass_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=text_fontsize, zorder=1)
+            ax.text (x0+x_text_margin, y_pos+y_text_margin, ass_name, verticalalignment="bottom", horizontalalignment="left", color=text_color, fontsize=text_fontsize, zorder=1)
 
         # save plot
         self.log (console, "SAVING PLOT "+plot_name_desc)
@@ -967,7 +969,7 @@ class kb_assembly_compare:
         best = 10
         worst = 1
         html_report_lines += ['<tr><td>'+sp+'</td></tr>']
-        html_report_lines += ['<tr><td colspan='+str(non_hist_colspan+hist_colspan)+'><table cellpadding=5 cellspacing=0 border=1><tr>']
+        html_report_lines += ['<tr><td></td><td colspan='+str(non_hist_colspan+hist_colspan-1)+'><table cellpadding=5 cellspacing=0 border=1><tr>']
         html_report_lines += ['<td bgcolor="'+get_cell_color(best, best, worst)+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'BEST'+'</font></td>']
         for i in [9,8,7,6,5,4,3,2]:
             html_report_lines += ['<td bgcolor="'+get_cell_color(i, best, worst)+'"><font size='+text_fontsize+'>'+sp+'</font></td>']
