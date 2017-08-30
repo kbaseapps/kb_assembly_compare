@@ -794,7 +794,7 @@ class kb_assembly_compare:
                 y_margin = 0.01
                 title_fontsize = 12
                 text_color = "#606060"
-                hist_color = "skyblue"
+                hist_color = "lightslategray"
                 fig = plt.figure()
                 fig.set_size_inches(img_in_width[hist_i], img_in_height)
                 ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
@@ -959,7 +959,7 @@ class kb_assembly_compare:
         #html_report_lines += ['<tr><td valign=top align=left rowspan=1><div class="vertical-text_title"><div class="vertical-text__inner_title"><font color="'+text_color+'">'+label+'</font></div></div></td>']
 
         html_report_lines += ['<table cellpadding='+str(cellpadding)+' cellspacing='+str(cellspacing)+' border='+str(border)+'>']
-        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(non_hist_colspan+hist_colspan)+'><img src="'+key_png_file+'></td></tr>']
+        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(non_hist_colspan+hist_colspan)+'><img src="'+key_png_file+'"></td></tr>']
         html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(non_hist_colspan-1)+'><img src="'+cumulative_lens_png_file+'" height='+str(big_img_height)+'></td>']
         html_report_lines += ['<td valign=top align=left rowspan=1 colspan='+str(hist_colspan)+'><img src="'+sorted_lens_png_file+'" height='+str(big_img_height)+'></td></tr>']
 
@@ -968,10 +968,10 @@ class kb_assembly_compare:
         worst = 1
         html_report_lines += ['<tr><td>'+sp+'</td></tr>']
         html_report_lines += ['<tr><td colspan='+str(non_hist_colspan+hist_colspan)+'><table cellpadding=5 cellspacing=0 border=1><tr>']
-        html_report_lines += ['<td bgcolor="'+get_cell_color(best, best, worst)+'">'+'BEST'+'</td>']
+        html_report_lines += ['<td bgcolor="'+get_cell_color(best, best, worst)+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'BEST'+'</font></td>']
         for i in [9,8,7,6,5,4,3,2]:
-            html_report_lines += ['<td bgcolor="'+get_cell_color(i, best, worst)+'">'+sp+'</td>']
-        html_report_lines += ['<td bgcolor="'+get_cell_color(worst, best, worst)+'">'+'WORST'+'</td>']
+            html_report_lines += ['<td bgcolor="'+get_cell_color(i, best, worst)+'"><font size='+text_fontsize+'>'+sp+'</font></td>']
+        html_report_lines += ['<td bgcolor="'+get_cell_color(worst, best, worst)+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'WORST'+'</font></td>']
         html_report_lines += ['</tr><table></td></tr>']
 
         # header
