@@ -401,7 +401,7 @@ class kb_assembly_compare:
             hist_cnt_by_bin = []  # just to get shared heights for separate hist graphs
             top_hist_cnt = [0, 0, 0]
             #hist_binwidth = [500, 5000, 20000]
-            long_contig_nbins = 60
+            long_contig_nbins = 75
             hist_binwidth = [500, 5000, (max_len // long_contig_nbins)]
             min_hist_val_accept = [0, 10000, 100000]
             max_hist_val_accept = [10000, 100000, 100000000000000000000]
@@ -522,9 +522,10 @@ class kb_assembly_compare:
         self.log (console, "GENERATING PLOT "+plot_name_desc)
         img_dpi = 200
         img_units = "in"
-        spacing = 1.0 / float(total_ass+3)
+        #spacing = 1.0 / float(total_ass+3)
+        spacing = 1.0
         img_in_width  = 6.0
-        img_in_height = 2.0 / spacing
+        img_in_height = 0.5 * (total_ass+3)
         x_text_margin = 0.01
         y_text_margin = 0.01
         title_fontsize = 12
@@ -556,7 +557,7 @@ class kb_assembly_compare:
         x_indent = 0.1
         x_coords = [x0, x1]
         ax.set_xlim(x0-x_indent, x1+x_indent)
-        ax.set_ylim(0, (total_ass+3) * spacing)
+        ax.set_ylim(-1, (total_ass+3) * spacing)
         for ass_i,ass_name in enumerate(assembly_names):
             y_pos = total_ass - spacing*(ass_i + 2)
             y_coords = [y_pos, y_pos]
@@ -797,7 +798,7 @@ class kb_assembly_compare:
                 y_margin = 0.01
                 title_fontsize = 12
                 text_color = "#606060"
-                hist_color = "lightslategray"
+                hist_color = "slateblue"
                 fig = plt.figure()
                 fig.set_size_inches(img_in_width[hist_i], img_in_height)
                 ax = plt.subplot2grid ( (1,1), (0,0), rowspan=1, colspan=1)
