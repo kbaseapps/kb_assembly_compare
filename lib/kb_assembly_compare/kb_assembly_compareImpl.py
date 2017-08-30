@@ -522,8 +522,9 @@ class kb_assembly_compare:
         self.log (console, "GENERATING PLOT "+plot_name_desc)
         img_dpi = 200
         img_units = "in"
+        spacing = 1.0 / float(total_ass+3)
         img_in_width  = 6.0
-        img_in_height = float(total_ass) / 2.0 
+        img_in_height = 2.0 / spacing
         x_text_margin = 0.01
         y_text_margin = 0.01
         title_fontsize = 12
@@ -550,12 +551,12 @@ class kb_assembly_compare:
         #plt.tight_layout()
 
         # build x and y coord lists
-        spacing = 1.0 / float(total_ass+3)
         x0 = 1
         x1 = 2
         x_indent = 0.1
         x_coords = [x0, x1]
         ax.set_xlim(x0-x_indent, x1+x_indent)
+        ax.set_ylim(0, (total_ass+3) * spacing)
         for ass_i,ass_name in enumerate(assembly_names):
             y_pos = total_ass - spacing*(ass_i + 2)
             y_coords = [y_pos, y_pos]
@@ -932,6 +933,7 @@ class kb_assembly_compare:
         subtab_N_rows = 6
         hist_colspan = 3 # in cells
         non_hist_colspan = 7 # in cells
+        key_img_width = 400  # in pixels
         big_img_height = 300  # in pixels
         hist_img_height = 200  # in pixels
         head_color = "#eeeeff"
@@ -961,7 +963,7 @@ class kb_assembly_compare:
         #html_report_lines += ['<tr><td valign=top align=left rowspan=1><div class="vertical-text_title"><div class="vertical-text__inner_title"><font color="'+text_color+'">'+label+'</font></div></div></td>']
 
         html_report_lines += ['<table cellpadding='+str(cellpadding)+' cellspacing='+str(cellspacing)+' border='+str(border)+'>']
-        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(non_hist_colspan+hist_colspan)+'><img src="'+key_png_file+'"></td></tr>']
+        html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(non_hist_colspan+hist_colspan)+'><img src="'+key_png_file+'" width='+str(key_img_width)+'></td></tr>']
         html_report_lines += ['<tr><td valign=top align=left rowspan=1 colspan='+str(non_hist_colspan-1)+'><img src="'+cumulative_lens_png_file+'" height='+str(big_img_height)+'></td>']
         html_report_lines += ['<td valign=top align=left rowspan=1 colspan='+str(hist_colspan)+'><img src="'+sorted_lens_png_file+'" height='+str(big_img_height)+'></td></tr>']
 
@@ -974,7 +976,7 @@ class kb_assembly_compare:
         for i in [9,8,7,6,5,4,3,2]:
             html_report_lines += ['<td bgcolor="'+get_cell_color(i, best, worst)+'"><font size='+text_fontsize+'>'+sp+'</font></td>']
         html_report_lines += ['<td bgcolor="'+get_cell_color(worst, best, worst)+'"><font color="'+text_color+'" size='+text_fontsize+'>'+'WORST'+'</font></td>']
-        html_report_lines += ['</tr><table></td></tr>']
+        html_report_lines += ['</tr></table></td></tr>']
 
         # header
         html_report_lines += ['<tr bgcolor="'+head_color+'">']
