@@ -33,8 +33,24 @@ parameters :
         ui-name : |
             Assembly(s) or AssemblySet(s) <font color=red>*</font>
         short-hint : |
-            Genomes to use as benchmark
+            Assemblies for comparing contig length distributions
 
 description : |
-    <p>This method allows the user to compare attributes of the distributions of characteristics of contigs from different assemblies.</p>
+    <p>Compare Assembled Contig Distributions allows the user to gain a picture of the sizes of the assembled contigs from different assembly runs.  Longer contigs are typically better, so the plots chosen for the comparisons reflect that, emphasizing the contribution of longer contigs.  The plots and the colored table are essentially identical to the source of their inspiration, QUAST, although QUAST is not actually run, rather the values are computed by this App.  This App also has a vertical table layout of the assemblies, and additionally offers histograms of the contig lengths, broken up into length regimes to allow for more visible differences in the longer regimes with fewer counts.</p>
 
+    <p><hr></p>
+    <p><i>Designed and Implemented for KBase by <a href="mailto:DCChivian@lbl.gov">Dylan Chivian (DCChivian@lbl.gov)</a></i></p>
+    <p><hr></p>
+    <p><b>Configuration:</b></p>
+    <p><b><i>Assembly Object(s):</i></b> The Assembly object(s) is a collection of assembled genome fragments, called "contigs".  Their length distributions usually differ depending on the input sequence data, the assembler, and the parameterization of the assembler.  These comparisons are meant to aid the user in selecting which assembly might be best for their purposes downstream, such as for extracting genomes from a metagenome.  This App may be run on a single Assembly, but is really meant for comparing multiple assemblies that may be provided one-by-one or as an Assembly Set.</p>
+    <p><hr></p>
+    <p><b>Output:</b></p>
+    <p><b><i>Output Object:</i></b> This App does not create an output object.</p>
+    <p><b><i>Output Report:</i></b>
+    <ul>
+    <li> The report includes two plots at the top.  The first plot reports the cumulative sum on the y-axis of the sorted contig lengths where the contigs are sorted with the longest first.  The second plot again offers the sum of the sorted contigs, this time on the x-axis, with the y-axis reporting the length of each contig.  This plot is similar to the Nx plot available from QUAST but uses the summed length instead of % of contigs as the x-coordinate.
+    <li> Various attributes such as N50, longest contig, number of contigs >= a given length, the sum of the contig lengths for contigs over that length cutoff, etc. are offered in a table, akin the the QUAST table, but with a vertical layout.  The categories in the table are colored from blue (BEST) to red (WORST) for each category.
+    <li> A histogram of the contig lengths in three length regimes are offered, with axes scaled to match those of the other assemblies within that regime, so that visual comparison is simplified.  The three regimes are up to 10 Kbp, between 10 Kbp and 100 Kbp, and above 100 Kbp.
+    </ul>
+    </p>
+    <p><b><i>Downloadable files:</i></b> All the plots from this App are available for download in both PNG image and PDF document formats.  The HTML report may be saved using the browser.</p>
