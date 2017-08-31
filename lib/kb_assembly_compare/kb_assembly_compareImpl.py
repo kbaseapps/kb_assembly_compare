@@ -401,7 +401,7 @@ class kb_assembly_compare:
             hist_cnt_by_bin = []  # just to get shared heights for separate hist graphs
             top_hist_cnt = [0, 0, 0]
             #hist_binwidth = [500, 5000, 20000]
-            long_contig_nbins = 75
+            long_contig_nbins = 70
             hist_binwidth = [500, 5000, (max_len // long_contig_nbins)]
             min_hist_val_accept = [0, 10000, 100000]
             max_hist_val_accept = [10000, 100000, 100000000000000000000]
@@ -779,8 +779,8 @@ class kb_assembly_compare:
         # Hist plots for each assembly
         hist_lens_png_files = []
         hist_lens_pdf_files = []
-        units            = ['Kbp', 'Kbp', '100 Kbp']
-        val_scale_adjust = [1000, 1000, 100000]
+        units            = ['Kbp', 'Kbp', 'Mbp']
+        val_scale_adjust = [1000, 1000, 1000000]
         img_in_width     = [3.0, 3.0, 7.0]
         for ass_i,ass_name in enumerate(assembly_names):
             hist_lens_png_files.append([])
@@ -823,7 +823,7 @@ class kb_assembly_compare:
                 min_hist_bin_beg = 0
                 max_hist_bin_end = float(long_len) / val_scale_adjust[hist_i]
                 binwidth = float (hist_binwidth[hist_i]) / val_scale_adjust[hist_i]
-                ax.set_xlim ([0, max_hist_bin_end + binwidth])
+                ax.set_xlim ([0, max_hist_bin_end + 2*binwidth])
                 ax.set_ylim ([0, top_hist_cnt[hist_i] + top_hist_cnt[hist_i] // 10])
                 ax.set_xlabel ('contig length bin ('+units[hist_i]+')')
                 ax.set_ylabel ('# contigs')
