@@ -6,20 +6,34 @@ MAINTAINER KBase Developer
 # install line here, a git checkout to download code, or run any other
 # installation scripts.
 
-RUN apt-get update && ls
+RUN apt-get update
+RUN pip install --upgrade pip
 
 # Here we install a python coverage tool and an
 # https library that is out of date in the base image.
 
+#RUN apt-get install -y python-coverage
 RUN pip install coverage
 
 # update security libraries in the base image
-RUN pip install cffi --upgrade \
-    && pip install pyopenssl --upgrade \
-    && pip install ndg-httpsclient --upgrade \
-    && pip install pyasn1 --upgrade \
-    && pip install requests --upgrade \
+#RUN pip install cffi --upgrade \
+#    && pip install pyopenssl --upgrade \
+#    && pip install ndg-httpsclient --upgrade \
+#    && pip install pyasn1 --upgrade \
+#    && pip install requests --upgrade \
+#    && pip install 'requests[security]' --upgrade
+
+RUN sudo apt-get install python-dev libffi-dev libssl-dev
+RUN pip install cffi --upgrade
+RUN pip install pyopenssl --upgrade
+RUN pip install ndg-httpsclient --upgrade
+RUN pip install pyasn1 --upgrade
+
+RUN pip install requests --upgrade \
     && pip install 'requests[security]' --upgrade
+#    && pip install 'requests[security]' --upgrade \
+#    && pip install ipython \
+#    && apt-get install nano
 
 
 # Install pandas
