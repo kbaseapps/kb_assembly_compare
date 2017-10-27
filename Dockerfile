@@ -23,7 +23,7 @@ RUN pip install coverage
 #    && pip install requests --upgrade \
 #    && pip install 'requests[security]' --upgrade
 
-RUN sudo apt-get install python-dev libffi-dev libssl-dev
+#RUN sudo apt-get install python-dev libffi-dev libssl-dev
 RUN pip install cffi --upgrade
 RUN pip install pyopenssl --upgrade
 RUN pip install ndg-httpsclient --upgrade
