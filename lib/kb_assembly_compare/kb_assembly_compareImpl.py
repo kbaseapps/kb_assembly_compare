@@ -51,9 +51,9 @@ class kb_assembly_compare:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "1.0.0"
+    VERSION = "1.1.0"
     GIT_URL = "https://github.com/dcchivian/kb_assembly_compare"
-    GIT_COMMIT_HASH = "751d420f0c2e542922983f91387e8536bd4bb373"
+    GIT_COMMIT_HASH = "292538f51f667684cc71623bcc2ede51b6879b63"
 
     #BEGIN_CLASS_HEADER
     workspaceURL     = None
@@ -95,6 +95,36 @@ class kb_assembly_compare:
         #END_CONSTRUCTOR
         pass
 
+
+    def run_filter_contigs_by_length(self, ctx, params):
+        """
+        :param params: instance of type "Filter_Contigs_by_Length_Params"
+           (filter_contigs_by_length() ** **  Remove Contigs that are under a
+           minimum threshold) -> structure: parameter "workspace_name" of
+           type "workspace_name" (** The workspace object refs are of form:
+           ** **    objects = ws.get_objects([{'ref':
+           params['workspace_id']+'/'+params['obj_name']}]) ** ** "ref" means
+           the entire name combining the workspace id and the object name **
+           "id" is a numerical identifier of the workspace or object, and
+           should just be used for workspace ** "name" is a string identifier
+           of a workspace or object.  This is received from Narrative.),
+           parameter "input_assembly_refs" of type "data_obj_ref", parameter
+           "output_name" of type "data_obj_name"
+        :returns: instance of type "Filter_Contigs_by_Length_Output" ->
+           structure: parameter "report_name" of type "data_obj_name",
+           parameter "report_ref" of type "data_obj_ref"
+        """
+        # ctx is the context object
+        # return variables are: returnVal
+        #BEGIN run_filter_contigs_by_length
+        #END run_filter_contigs_by_length
+
+        # At some point might do deeper type checking...
+        if not isinstance(returnVal, dict):
+            raise ValueError('Method run_filter_contigs_by_length return value ' +
+                             'returnVal is not type dict as required.')
+        # return the results
+        return [returnVal]
 
     def run_contig_distribution_compare(self, ctx, params):
         """

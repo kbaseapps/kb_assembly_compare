@@ -165,6 +165,23 @@ public class KbAssemblyCompareClient {
     }
 
     /**
+     * <p>Original spec-file function name: run_filter_contigs_by_length</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.kbassemblycompare.FilterContigsByLengthParams FilterContigsByLengthParams} (original type "Filter_Contigs_by_Length_Params")
+     * @return   instance of type {@link us.kbase.kbassemblycompare.FilterContigsByLengthOutput FilterContigsByLengthOutput} (original type "Filter_Contigs_by_Length_Output")
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public FilterContigsByLengthOutput runFilterContigsByLength(FilterContigsByLengthParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<FilterContigsByLengthOutput>> retType = new TypeReference<List<FilterContigsByLengthOutput>>() {};
+        List<FilterContigsByLengthOutput> res = caller.jsonrpcCall("kb_assembly_compare.run_filter_contigs_by_length", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        return res.get(0);
+    }
+
+    /**
      * <p>Original spec-file function name: run_contig_distribution_compare</p>
      * <pre>
      * </pre>
