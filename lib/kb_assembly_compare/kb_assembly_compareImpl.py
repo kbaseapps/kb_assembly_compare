@@ -53,7 +53,7 @@ class kb_assembly_compare:
     ######################################### noqa
     VERSION = "1.1.0"
     GIT_URL = "https://github.com/dcchivian/kb_assembly_compare"
-    GIT_COMMIT_HASH = "ad1d67a932366af6279f3e568d1094bdf6be6b62"
+    GIT_COMMIT_HASH = "528c94025339f595747e83c90d8f337cdfb56572"
 
     #BEGIN_CLASS_HEADER
     workspaceURL     = None
@@ -118,6 +118,12 @@ class kb_assembly_compare:
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN run_filter_contigs_by_length
+
+        # very strange, re import from above isn't being retained in this scope
+        import re
+
+        #### Step 0: basic init
+        ##
         console = []
         invalid_msgs = []
         report_text = ''
@@ -158,6 +164,7 @@ class kb_assembly_compare:
         # param checks
         required_params = ['workspace_name',
                            'input_assembly_refs',
+                           'min_contig_length',
                            'output_name'
                           ]
         for arg in required_params:
@@ -193,17 +200,19 @@ class kb_assembly_compare:
             assembly_refs_seen = dict()
         
             for i,input_ref in enumerate(params['input_assembly_refs']):
+
                 # assembly obj info
                 try:
                     [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = range(11)  # object_info tuple
                     input_obj_info = wsClient.get_object_info_new ({'objects':[{'ref':input_ref}]})[0]
+                    #print ("INPUT_OBJ_INFO")
+                    #pprint(input_obj_info)  # DEBUG
                     input_obj_type = re.sub ('-[0-9]+\.[0-9]+$', "", input_obj_info[TYPE_I])  # remove trailing version
                     input_obj_name = input_obj_info[NAME_I]
-
-                    self.log (console, "GETTING ASSEMBLY: "+str(input_ref)+" "+str(input_obj_name))  # DEBUG
-
+                    self.log (console, "Adding ASSEMBLY: "+str(input_ref)+" "+str(input_obj_name))  # DEBUG
                 except Exception as e:
-                    raise ValueError('Unable to get object from workspace: (' + input_ref +')' + str(e))
+                    raise ValueError('Unable to get object from workspace: (' + input_ref +'): ' + str(e))
+
                 if input_obj_type not in accepted_input_types:
                     raise ValueError ("Input object of type '"+input_obj_type+"' not accepted.  Must be one of "+", ".join(accepted_input_types))
 
@@ -266,10 +275,10 @@ class kb_assembly_compare:
 
         #### STEP 3: Get contig attributes and create filtered output files
         ##
-        filtered_assembly_file_paths = []
-        original_contig_count = []
-        filtered_contig_count = []
         if len(invalid_msgs) == 0:
+            filtered_contig_file_paths = []
+            original_contig_count = []
+            filtered_contig_count = []
 
             # score fasta lens in contig files
             read_buf_size  = 65536
@@ -283,6 +292,7 @@ class kb_assembly_compare:
                 original_contig_count.append(0)
                 filtered_contig_count.append(0)
                 filtered_file_path = assembly_file_path+".min_contig_length="+str(params['min_contig_length'])+"bp"
+                filtered_contig_file_paths.append(filtered_file_path)
                 with open (assembly_file_path, 'r', read_buf_size) as ass_handle, \
                      open (filtered_file_path, 'w', write_buf_size) as filt_handle:
                     seq_buf = ''
@@ -292,9 +302,9 @@ class kb_assembly_compare:
                             if seq_buf != '':
                                 original_contig_count[ass_i] += 1
                                 seq_len = len(seq_buf)
-                                if (seq_len >= int(params['min_contig_len']):
+                                if seq_len >= int(params['min_contig_length']):
                                     filtered_contig_count[ass_i] += 1
-                                    filt_handle.write(last_header+"\n")
+                                    filt_handle.write(last_header)  # last_header already has newline
                                     filt_handle.write(seq_buf+"\n")
                                 seq_buf = ''
                                 last_header = fasta_line
@@ -303,157 +313,122 @@ class kb_assembly_compare:
                     if seq_buf != '':
                         original_contig_count[ass_i] += 1
                         seq_len = len(seq_buf)
-                        if (seq_len >= int(params['min_contig_len']):
+                        if seq_len >= int(params['min_contig_length']):
                             filtered_contig_count[ass_i] += 1
-                            filt_handle.write(last_header+"\n")
+                            filt_handle.write(last_header)  # last_header already has newline
                             filt_handle.write(seq_buf+"\n")
                         seq_buf = ''
 
-        # HERE
+                # DEBUG
+                #with open (filtered_file_path, 'r', read_buf_size) as ass_handle:
+                #    for fasta_line in ass_handle:
+                #        print ("FILTERED LINE: '"+fasta_line+"'")
 
 
-        # STEP 2: get the read library as deinterleaved fastq files
-        input_ref = params['read_library_ref']
-        reads_params = {'read_libraries': [input_ref],
-                        'interleaved': 'false',
-                        'gzipped': None
-                        }
-        ru = ReadsUtils(self.callbackURL)
-        reads = ru.download_reads(reads_params)['files']
-
-        print('Input reads files:')
-        fwd = reads[input_ref]['files']['fwd']
-        rev = reads[input_ref]['files']['rev']
-        pprint('forward: ' + fwd)
-        pprint('reverse: ' + rev)
-
-        # STEP 3: run megahit
-        # construct the command
-        megahit_cmd = [self.MEGAHIT]
-
-        # we only support PE reads, so add that
-        megahit_cmd.append('-1')
-        megahit_cmd.append(fwd)
-        megahit_cmd.append('-2')
-        megahit_cmd.append(rev)
-
-        # if a preset is defined, use that:
-        if 'megahit_parameter_preset' in params:
-            if params['megahit_parameter_preset']:
-                megahit_cmd.append('--presets')
-                megahit_cmd.append(params['megahit_parameter_preset'])
-
-        if 'min_count' in params:
-            if params['min_count']:
-                megahit_cmd.append('--min-count')
-                megahit_cmd.append(str(params['min_count']))
-        if 'k_min' in params:
-            if params['k_min']:
-                megahit_cmd.append('--k-min')
-                megahit_cmd.append(str(params['k_min']))
-        if 'k_max' in params:
-            if params['k_max']:
-                megahit_cmd.append('--k-max')
-                megahit_cmd.append(str(params['k_max']))
-        if 'k_step' in params:
-            if params['k_step']:
-                megahit_cmd.append('--k-step')
-                megahit_cmd.append(str(params['k_step']))
-        if 'k_list' in params:
-            if params['k_list']:
-                k_list = []
-                for k_val in params['k_list']:
-                    k_list.append(str(k_val))
-                megahit_cmd.append('--k-list')
-                megahit_cmd.append(','.join(k_list))
-
-        min_contig_length = self.DEFAULT_MIN_CONTIG_LENGTH
-        if 'min_contig_length' in params:
-            if params['min_contig_length']:
-                if str(params['min_contig_length']).isdigit():
-                    min_contig_length = params['min_contig_length']
+        #### STEP 4: save the filtered assemblies
+        ##
+        if len(invalid_msgs) == 0:
+            non_zero_output_seen = False
+            filtered_contig_refs  = []
+            filtered_contig_names = []
+            #assemblyUtil = AssemblyUtil(self.callbackURL)
+            for ass_i,filtered_contig_file in enumerate(filtered_contig_file_paths):
+                if filtered_contig_count[ass_i] == 0:
+                    self.log (console, "SKIPPING totally filtered assembled contigs from "+assembly_names[ass_i])
+                    filtered_contig_refs.append(None)
+                    filtered_contig_names.append(None)
                 else:
-                    raise ValueError('min_contig_length parameter must be a non-negative integer')
+                    non_zero_output_seen = True
+                    if len(assembly_refs) == 1:
+                        output_obj_name = params['output_name']
+                    else:
+                        output_obj_name = assembly_names[ass_i]+".min_contig_length"+str(params['min_contig_length'])+"bp"
+                    filtered_contig_names.append(output_obj_name)
 
-        megahit_cmd.append('--min-contig-len')
-        megahit_cmd.append(str(min_contig_length))
+                    output_data_ref = auClient.save_assembly_from_fasta({
+                        'file': {'path': filtered_contig_file},
+                        'workspace_name': params['workspace_name'],
+                        'assembly_name': output_obj_name
+                    })
+                    filtered_contig_refs.append(output_data_ref)
+                    filtered_contig_names.append(output_obj_name)
+            # save AssemblySet
+            if len(assembly_refs) > 1 and non_zero_output_seen:
+                items = []
+                for ass_i,filtered_contig_file in enumerate(filtered_contig_file_paths):
+                    if filtered_contig_count[ass_i] == 0:
+                        continue
+                    self.log (console, "adding filtered assembly: "+filtered_contig_names[ass_i])
+                    items.append({'ref': filtered_contig_refs[ass_i],
+                                  'label': filtered_contig_names[ass_i],
+                                  #'data_attachment': ,                         
+                                  #'info'                                       
+                              })
 
-        # set the output location
-        timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() * 1000)
-        output_dir = os.path.join(self.scratch, 'output.' + str(timestamp))
-        megahit_cmd.append('-o')
-        megahit_cmd.append(output_dir)
+                # load the method provenance from the context object                 
+                self.log(console,"SETTING PROVENANCE")  # DEBUG                      
+                provenance = [{}]
+                if 'provenance' in ctx:
+                    provenance = ctx['provenance']
+                # add additional info to provenance here, in this case the input data object reference                                                           
+                provenance[0]['input_ws_objects'] = []
+                for assRef in params['input_assembly_refs']:
+                    provenance[0]['input_ws_objects'].append(assRef)
+                provenance[0]['service'] = 'kb_assembly_compare'
+                provenance[0]['method'] = 'run_filter_contigs_by_length'
 
-        # run megahit
-        print('running megahit:')
-        print('    ' + ' '.join(megahit_cmd))
-        p = subprocess.Popen(megahit_cmd, cwd=self.scratch, shell=False)
-        retcode = p.wait()
-
-        print('Return code: ' + str(retcode))
-        if p.returncode != 0:
-            raise ValueError('Error running MEGAHIT, return code: ' +
-                             str(retcode) + '\n')
-
-        output_contigs = os.path.join(output_dir, 'final.contigs.fa')
-
-        # on macs, we cannot run megahit in the shared host scratch space, so we need to move the file there
-        if self.mac_mode:
-            shutil.move(output_contigs, os.path.join(self.host_scratch, 'final.contigs.fa'))
-            output_contigs = os.path.join(self.host_scratch, 'final.contigs.fa')
-
-        # STEP 4: save the resulting assembly
-        assemblyUtil = AssemblyUtil(self.callbackURL)
-        output_data_ref = assemblyUtil.save_assembly_from_fasta({
-                                                                'file': {'path': output_contigs},
-                                                                'workspace_name': params['workspace_name'],
-                                                                'assembly_name': params['output_contigset_name']
-                                                                })
+                # save AssemblySet
+                self.log(console,"SAVING ASSEMBLY_SET")  # DEBUG
+                output_assemblySet_obj = { 'description': params['output_name']+" filtered by min_contig_length >= "+str(params['min_contig_length'])+"bp",
+                                           'items': items
+                                       }
+                output_assemblySet_name = params['output_name']
+                try:
+                    output_assemblySet_ref = setAPI_Client.save_assembly_set_v1 ({'workspace_name': params['workspace_name'],
+                                                                                  'output_object_name': output_assemblySet_name,
+                                                                                  'data': output_assemblySet_obj
+                                                                              })['set_ref']
+                except Exception as e:
+                    raise ValueError('SetAPI FAILURE: Unable to save assembly set object to workspace: (' + params['workspace_name']+")\n" + str(e))
 
 
-        # STEP 5: generate and save the report
+        #### STEP 5: generate and save the report
+        ##
+        if len(invalid_msgs) > 0:
+            report_text += "\n".join(invalid_msgs)
+            objects_created = None
+        else:
+            # report text
+            if len(assembly_refs) > 1 and non_zero_output_seen:
+                report_text += 'AssemblySet saved to: ' + params['workspace_name'] + '/' + params['output_name'] + '\n'
+            for ass_i,filtered_contig_file in enumerate(filtered_contig_file_paths):
+                report_text += 'ORIGINAL Contig count: '+str(original_contig_count[ass_i])+"\t"+'in Assembly '+assembly_names[ass_i]+"\n"
+                report_text += 'FILTERED Contig count: '+str(filtered_contig_count[ass_i])+"\t"+'in Assembly '+filtered_contig_names[ass_i]+"\n"
+                if filtered_contig_count[ass_i] == 0:
+                    report_text += "  (no output object created for "+filtered_contig_names[ass_i]+")"+"\n"
 
-        # compute a simple contig length distribution for the report
-        lengths = []
-        for seq_record in SeqIO.parse(output_contigs, 'fasta'):
-            lengths.append(len(seq_record.seq))
+            # created objects
+            objects_created = None
+            if non_zero_output_seen:
+                objects_created = []
+                if len(assembly_refs) > 1:
+                    objects_created.append({'ref': output_assemblySet_ref, 'description': params['output_name']+" filtered min_contig_len >= "+str(params['min_contig_length'])+"bp"})
+                for ass_i,filtered_contig_ref in enumerate(filtered_contig_refs):
+                    if filtered_contig_count[ass_i] == 0:
+                        continue
+                    objects_created.append({'ref': filtered_contig_refs[ass_i], 'description': filtered_contig_names[ass_i]+" filtered min_contig_len >= "+str(params['min_contig_length'])+"bp"})
 
-        report = ''
-        report += 'ContigSet saved to: ' + params['workspace_name'] + '/' + params['output_contigset_name'] + '\n'
-        report += 'Assembled into ' + str(len(lengths)) + ' contigs.\n'
-        report += 'Avg Length: ' + str(sum(lengths) / float(len(lengths))) + ' bp.\n'
-
-        bins = 10
-        counts, edges = np.histogram(lengths, bins)
-        report += 'Contig Length Distribution (# of contigs -- min to max basepairs):\n'
-        for c in range(bins):
-            report += '   ' + str(counts[c]) + '\t--\t' + str(edges[c]) + ' to ' + str(edges[c + 1]) + ' bp\n'
-
-        print('Running QUAST')
-        kbq = kb_quast(self.callbackURL)
-        try:
-            quastret = kbq.run_QUAST({'files': [{'path': output_contigs,
-                                                 'label': params['output_contigset_name']}]})
-        except QUASTError as qe:
-            # not really any way to test this, all inputs have been checked earlier and should be
-            # ok 
-            print('Logging exception from running QUAST')
-            print(str(qe))
-            # TODO delete shock node
-            raise
-
+        # Save report
         print('Saving report')
         kbr = KBaseReport(self.callbackURL)
         try:
             report_info = kbr.create_extended_report(
-                {'message': report,
-                 'objects_created': [{'ref': output_data_ref, 'description': 'Assembled contigs'}],
+                {'message': report_text,
+                 'objects_created': objects_created,
                  'direct_html_link_index': 0,
-                 'html_links': [{'shock_id': quastret['shock_id'],
-                                 'name': 'report.html',
-                                 'label': 'QUAST report'}
-                                ],
-                 'report_object_name': 'kb_megahit_report_' + str(uuid.uuid4()),
+                 'html_links': None,
+                 'file_links': None,
+                 'report_object_name': 'kb_filter_contigs_by_length_report_' + str(uuid.uuid4()),
                  'workspace_name': params['workspace_name']
                  })
         except _RepError as re:
@@ -465,7 +440,7 @@ class kb_assembly_compare:
             raise
 
         # STEP 6: contruct the output to send back
-        output = {'report_name': report_info['name'], 'report_ref': report_info['ref']}
+        returnVal = {'report_name': report_info['name'], 'report_ref': report_info['ref']}
 
         #END run_filter_contigs_by_length
 
@@ -496,6 +471,9 @@ class kb_assembly_compare:
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN run_contig_distribution_compare
+
+        # very strange, re import from above isn't being retained in this scope
+        import re
 
         #### STEP 0: basic init
         ##
@@ -583,7 +561,7 @@ class kb_assembly_compare:
                     self.log (console, "GETTING ASSEMBLY: "+str(input_ref)+" "+str(input_obj_name))  # DEBUG
 
                 except Exception as e:
-                    raise ValueError('Unable to get object from workspace: (' + input_ref +')' + str(e))
+                    raise ValueError('Unable to get object from workspace: (' + input_ref +'): ' + str(e))
                 if input_obj_type not in accepted_input_types:
                     raise ValueError ("Input object of type '"+input_obj_type+"' not accepted.  Must be one of "+", ".join(accepted_input_types))
 
