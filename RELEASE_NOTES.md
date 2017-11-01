@@ -1,6 +1,6 @@
 ### Version 1.1.0
 __Changes__
-- added App "Filter Assembly Contigs by Length"
+- added App "Filter Assembled Contigs by Length"
 
 ### Version 1.0.1
 __Changes__
