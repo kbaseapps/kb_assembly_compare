@@ -22,6 +22,25 @@ module kb_assembly_compare {
     typedef int    bool;
 
 
+    /* filter_contigs_by_length()
+    **
+    **  Remove Contigs that are under a minimum threshold
+    */
+    typedef structure {
+        workspace_name workspace_name;
+	data_obj_ref   input_assembly_refs;   /* Assemblies or AssemblySets */
+	int            min_contig_length;
+        data_obj_name  output_name;
+    } Filter_Contigs_by_Length_Params;
+
+    typedef structure {
+	data_obj_name report_name;
+	data_obj_ref  report_ref;
+    } Filter_Contigs_by_Length_Output;
+
+    funcdef run_filter_contigs_by_length (Filter_Contigs_by_Length_Params params)  returns (Filter_Contigs_by_Length_Output) authentication required;
+
+
     /* contig_distribution_compare()
     **
     **  Compare Assembly Contig Length Distributions

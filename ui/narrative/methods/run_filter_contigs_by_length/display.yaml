@@ -1,0 +1,64 @@
+#
+# define display information
+#
+name: Filter Assembled Contigs by Length
+tooltip: |
+    Extract contigs at least meeting a minimum length threshold
+screenshots: []
+
+icon: kb-blue.png
+
+#
+# define a set of similar methods that might be useful to the user
+#
+suggestions:
+    apps:
+        related:
+            []
+        next:
+            []
+    methods:
+        related:
+            []
+        next:
+            []
+
+#
+# Configure the display and description of parameters
+#
+parameters :
+    input_assembly_refs:
+        ui-name : |
+            Assembly(s) or AssemblySet(s) <font color=red>*</font>
+        short-hint : |
+            Assemblies for comparing contig length distributions
+    min_contig_length:
+        ui-name : |
+            Min Contig Length <font color=red>*</font>
+        short-hint : |
+            Set the length threshold that all assembled contigs must meet or exceed
+    output_name:
+        ui-name : |
+            Output name <font color=red>*</font>
+        short-hint : |
+            Name the filtered Assembly output object (or AssemblySet for multiple Assembly inputs)
+
+description : |
+    <p>Filter Assembled Contigs by Length allows the user remove shorter contigs from their Assembly objects.  This allows methods that analyze assemblies to run much faster on the most valuable contigs where genes are not truncated and genome context is available for longer contigs with multiple genes.</p>
+    <p>A typical protein domain is 80-200 amino acids for all alpha or all beta proteins, whereas alpha+beta and alpha/beta proteins are typically 150-400 amino acids per domain, therefore an absolute minimum length if a perfectly aligned contig is to fit a protein domain should be 300 bp.  Multi-domain proteins, which are typical, should be at least 1000 bp (again, getting lucky and aligning perfectly so the contig doesn't truncate the gene).  Therefore, it would be quite reasonable to at least filter contigs to 2 Kbp (which is our default) or higher if you are trying to get more than one protein per contig.  If proteins are your target, you should certainly not go below 300 bp.</p>
+
+    <p><hr></p>
+    <p><i>Designed and Implemented for KBase by <a href="mailto:DCChivian@lbl.gov">Dylan Chivian (DCChivian@lbl.gov)</a></i></p>
+    <p><hr></p>
+    <p><b>Configuration:</b></p>
+    <p><b><i>Assembly Object(s):</i></b> The Assembly object(s) is a collection of assembled genome fragments, called "contigs".  Their length distributions usually differ depending on the input sequence data, the assembler, and the parameterization of the assembler.  This App may be run on a single Assembly, several Assemblies, or an AssemblySet object containing multiple Assemblies.</p>
+    <p><hr></p>
+    <p><b>Output:</b></p>
+    <p><b><i>Output Object:</i></b>
+    <p><b><i>Output Object:</i></b> The Output object will be an Assembly Object for each input Assembly.  Additionally, if more than one Assembly is input, then the output will also include an AssemblySet object that contains the output Assembly object..</p>
+    <p><b><i>Output Report:</i></b>
+    <ul>
+    <li> The report indicates how many contigs were filtered for each Assembly.
+    </ul>
+    </p>
+    <p><b><i>Downloadable files:</i></b> The Assembly objects can be accessed in the Data Pane for download as FASTA.</p>

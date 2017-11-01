@@ -333,6 +333,10 @@ class Application(object):
         self.serverlog.set_log_level(6)
         self.rpc_service = JSONRPCServiceCustom()
         self.method_authentication = dict()
+        self.rpc_service.add(impl_kb_assembly_compare.run_filter_contigs_by_length,
+                             name='kb_assembly_compare.run_filter_contigs_by_length',
+                             types=[dict])
+        self.method_authentication['kb_assembly_compare.run_filter_contigs_by_length'] = 'required'  # noqa
         self.rpc_service.add(impl_kb_assembly_compare.run_contig_distribution_compare,
                              name='kb_assembly_compare.run_contig_distribution_compare',
                              types=[dict])

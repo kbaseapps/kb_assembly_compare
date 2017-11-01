@@ -7,61 +7,28 @@ MAINTAINER KBase Developer
 # installation scripts.
 
 RUN apt-get update
-RUN pip install --upgrade pip
 
 # Here we install a python coverage tool and an
 # https library that is out of date in the base image.
 
-#RUN apt-get install -y python-coverage
 RUN pip install coverage
 
 # update security libraries in the base image
-#RUN pip install cffi --upgrade \
-#    && pip install pyopenssl --upgrade \
-#    && pip install ndg-httpsclient --upgrade \
-#    && pip install pyasn1 --upgrade \
-#    && pip install requests --upgrade \
-#    && pip install 'requests[security]' --upgrade
-
-#RUN sudo apt-get install python-dev libffi-dev libssl-dev
-RUN pip install cffi --upgrade
-RUN pip install pyopenssl --upgrade
-RUN pip install ndg-httpsclient --upgrade
-RUN pip install pyasn1 --upgrade
-
-RUN pip install requests --upgrade \
+RUN pip install cffi pyopenssl cryptography==2.0.3 --upgrade \
+    && pip install ndg-httpsclient --upgrade \
+    && pip install pyasn1 --upgrade \
+    && pip install requests --upgrade \
     && pip install 'requests[security]' --upgrade
-#    && pip install 'requests[security]' --upgrade \
-#    && pip install ipython \
-#    && apt-get install nano
 
+# To install all the dependencies
+RUN apt-get update && apt-get install -y build-essential wget make curl unzip python && \
+    apt-get install -y r-base r-cran-gplots
 
 # Install pandas
 #RUN pip install pandas
 
-# Install X spoof execution wrapper
+# Install X spoof execution wrapper (for plotting)
 RUN apt-get -y install xvfb
-
-
-#### Install MUMmer4
-##
-RUN mkdir -p /kb/module
-WORKDIR /kb/module
-# YAGGO
-#RUN curl -s https://codeload.github.com/gmarcais/yaggo/tar.gz/v1.5.10 > yaggo.v1.5.10.tar.gz && \
-#    tar xfz yaggo.v1.5.10.tar.gz && \
-#    cd yaggo-1.5.10 && \
-#    make DEST=/usr/local/bin && \
-#    cp ./yaggo /usr/local/bin
-## MUMmer4
-#RUN git clone https://github.com/mummer4/mummer && \
-#    cd mummer && \
-##    mkdir aux_bin && \
-##    make check && \
-#    make install CPPFLAGS="-O3 -DSIXTYFOURBITS"
-##    mummerpath=`pwd` && \
-##    cd .. && \
-##    export PATH=$mergerpath:$mummerpath:$PATH
 
 # -----------------------------------------
 

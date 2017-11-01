@@ -110,6 +110,110 @@ sub new
 
 
 
+=head2 run_filter_contigs_by_length
+
+  $return = $obj->run_filter_contigs_by_length($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a kb_assembly_compare.Filter_Contigs_by_Length_Params
+$return is a kb_assembly_compare.Filter_Contigs_by_Length_Output
+Filter_Contigs_by_Length_Params is a reference to a hash where the following keys are defined:
+	workspace_name has a value which is a kb_assembly_compare.workspace_name
+	input_assembly_refs has a value which is a kb_assembly_compare.data_obj_ref
+	min_contig_length has a value which is an int
+	output_name has a value which is a kb_assembly_compare.data_obj_name
+workspace_name is a string
+data_obj_ref is a string
+data_obj_name is a string
+Filter_Contigs_by_Length_Output is a reference to a hash where the following keys are defined:
+	report_name has a value which is a kb_assembly_compare.data_obj_name
+	report_ref has a value which is a kb_assembly_compare.data_obj_ref
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a kb_assembly_compare.Filter_Contigs_by_Length_Params
+$return is a kb_assembly_compare.Filter_Contigs_by_Length_Output
+Filter_Contigs_by_Length_Params is a reference to a hash where the following keys are defined:
+	workspace_name has a value which is a kb_assembly_compare.workspace_name
+	input_assembly_refs has a value which is a kb_assembly_compare.data_obj_ref
+	min_contig_length has a value which is an int
+	output_name has a value which is a kb_assembly_compare.data_obj_name
+workspace_name is a string
+data_obj_ref is a string
+data_obj_name is a string
+Filter_Contigs_by_Length_Output is a reference to a hash where the following keys are defined:
+	report_name has a value which is a kb_assembly_compare.data_obj_name
+	report_ref has a value which is a kb_assembly_compare.data_obj_ref
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub run_filter_contigs_by_length
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function run_filter_contigs_by_length (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to run_filter_contigs_by_length:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'run_filter_contigs_by_length');
+	}
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "kb_assembly_compare.run_filter_contigs_by_length",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'run_filter_contigs_by_length',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method run_filter_contigs_by_length",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'run_filter_contigs_by_length',
+				       );
+    }
+}
+ 
+
+
 =head2 run_contig_distribution_compare
 
   $return = $obj->run_contig_distribution_compare($params)
@@ -535,6 +639,81 @@ an int
 =begin text
 
 an int
+
+=end text
+
+=back
+
+
+
+=head2 Filter_Contigs_by_Length_Params
+
+=over 4
+
+
+
+=item Description
+
+filter_contigs_by_length()
+**
+**  Remove Contigs that are under a minimum threshold
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+workspace_name has a value which is a kb_assembly_compare.workspace_name
+input_assembly_refs has a value which is a kb_assembly_compare.data_obj_ref
+min_contig_length has a value which is an int
+output_name has a value which is a kb_assembly_compare.data_obj_name
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+workspace_name has a value which is a kb_assembly_compare.workspace_name
+input_assembly_refs has a value which is a kb_assembly_compare.data_obj_ref
+min_contig_length has a value which is an int
+output_name has a value which is a kb_assembly_compare.data_obj_name
+
+
+=end text
+
+=back
+
+
+
+=head2 Filter_Contigs_by_Length_Output
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+report_name has a value which is a kb_assembly_compare.data_obj_name
+report_ref has a value which is a kb_assembly_compare.data_obj_ref
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+report_name has a value which is a kb_assembly_compare.data_obj_name
+report_ref has a value which is a kb_assembly_compare.data_obj_ref
+
 
 =end text
 
