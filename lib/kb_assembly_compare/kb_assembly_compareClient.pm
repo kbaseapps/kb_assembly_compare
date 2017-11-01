@@ -126,6 +126,7 @@ $return is a kb_assembly_compare.Filter_Contigs_by_Length_Output
 Filter_Contigs_by_Length_Params is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a kb_assembly_compare.workspace_name
 	input_assembly_refs has a value which is a kb_assembly_compare.data_obj_ref
+	min_contig_length has a value which is an int
 	output_name has a value which is a kb_assembly_compare.data_obj_name
 workspace_name is a string
 data_obj_ref is a string
@@ -145,6 +146,7 @@ $return is a kb_assembly_compare.Filter_Contigs_by_Length_Output
 Filter_Contigs_by_Length_Params is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a kb_assembly_compare.workspace_name
 	input_assembly_refs has a value which is a kb_assembly_compare.data_obj_ref
+	min_contig_length has a value which is an int
 	output_name has a value which is a kb_assembly_compare.data_obj_name
 workspace_name is a string
 data_obj_ref is a string
@@ -665,6 +667,7 @@ filter_contigs_by_length()
 a reference to a hash where the following keys are defined:
 workspace_name has a value which is a kb_assembly_compare.workspace_name
 input_assembly_refs has a value which is a kb_assembly_compare.data_obj_ref
+min_contig_length has a value which is an int
 output_name has a value which is a kb_assembly_compare.data_obj_name
 
 </pre>
@@ -676,6 +679,7 @@ output_name has a value which is a kb_assembly_compare.data_obj_name
 a reference to a hash where the following keys are defined:
 workspace_name has a value which is a kb_assembly_compare.workspace_name
 input_assembly_refs has a value which is a kb_assembly_compare.data_obj_ref
+min_contig_length has a value which is an int
 output_name has a value which is a kb_assembly_compare.data_obj_name
 
 

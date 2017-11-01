@@ -53,7 +53,7 @@ class kb_assembly_compare:
     ######################################### noqa
     VERSION = "1.1.0"
     GIT_URL = "https://github.com/dcchivian/kb_assembly_compare"
-    GIT_COMMIT_HASH = "292538f51f667684cc71623bcc2ede51b6879b63"
+    GIT_COMMIT_HASH = "ad1d67a932366af6279f3e568d1094bdf6be6b62"
 
     #BEGIN_CLASS_HEADER
     workspaceURL     = None
@@ -109,7 +109,8 @@ class kb_assembly_compare:
            should just be used for workspace ** "name" is a string identifier
            of a workspace or object.  This is received from Narrative.),
            parameter "input_assembly_refs" of type "data_obj_ref", parameter
-           "output_name" of type "data_obj_name"
+           "min_contig_length" of Long, parameter "output_name" of type
+           "data_obj_name"
         :returns: instance of type "Filter_Contigs_by_Length_Output" ->
            structure: parameter "report_name" of type "data_obj_name",
            parameter "report_ref" of type "data_obj_ref"
@@ -117,6 +118,355 @@ class kb_assembly_compare:
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN run_filter_contigs_by_length
+        console = []
+        invalid_msgs = []
+        report_text = ''
+        self.log(console, 'Running run_filter_contigs_by_length(): ')
+        self.log(console, "\n"+pformat(params))
+
+        # Auth
+        token = ctx['token']
+        headers = {'Authorization': 'OAuth '+token}
+        env = os.environ.copy()
+        env['KB_AUTH_TOKEN'] = token
+
+        # API Clients
+        #SERVICE_VER = 'dev'  # DEBUG
+        SERVICE_VER = 'release'
+        # wsClient
+        try:
+            wsClient = workspaceService(self.workspaceURL, token=token)
+        except Exception as e:
+            raise ValueError('Unable to instantiate wsClient with workspaceURL: '+ self.workspaceURL +' ERROR: ' + str(e))
+        # setAPI_Client
+        try:
+            #setAPI_Client = SetAPI (url=self.callbackURL, token=ctx['token'])  # for SDK local.  local doesn't work for SetAPI
+            setAPI_Client = SetAPI (url=self.serviceWizardURL, token=ctx['token'])  # for dynamic service
+        except Exception as e:
+            raise ValueError('Unable to instantiate setAPI_Client with serviceWizardURL: '+ self.serviceWizardURL +' ERROR: ' + str(e))
+        # auClient
+        try:
+            auClient = AssemblyUtil(self.callbackURL, token=ctx['token'], service_ver=SERVICE_VER)
+        except Exception as e:
+            raise ValueError('Unable to instantiate auClient with callbackURL: '+ self.callbackURL +' ERROR: ' + str(e))
+        # dfuClient
+        try:
+            dfuClient = DFUClient(self.callbackURL)
+        except Exception as e:
+            raise ValueError('Unable to instantiate dfu_Client with callbackURL: '+ self.callbackURL +' ERROR: ' + str(e))
+
+        # param checks
+        required_params = ['workspace_name',
+                           'input_assembly_refs',
+                           'output_name'
+                          ]
+        for arg in required_params:
+            if arg not in params or params[arg] == None or params[arg] == '':
+                raise ValueError ("Must define required param: '"+arg+"'")
+
+        # load provenance
+        provenance = [{}]
+        if 'provenance' in ctx:
+            provenance = ctx['provenance']
+        provenance[0]['input_ws_objects']=[]
+        for input_ref in params['input_assembly_refs']:
+            provenance[0]['input_ws_objects'].append(input_ref)
+
+        # set the output paths
+        timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
+        output_dir = os.path.join(self.scratch,'output.'+str(timestamp))
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        html_output_dir = os.path.join(output_dir,'html')
+        if not os.path.exists(html_output_dir):
+            os.makedirs(html_output_dir)
+
+
+        #### STEP 1: get assembly refs
+        ##
+        if len(invalid_msgs) == 0:
+            set_obj_type = "KBaseSets.AssemblySet"
+            assembly_obj_types = ["KBaseGenomeAnnotations.Assembly", "KBaseGenomes.ContigSet"]
+            accepted_input_types = [set_obj_type] + assembly_obj_types
+            assembly_refs = []
+            assembly_names = []
+            assembly_refs_seen = dict()
+        
+            for i,input_ref in enumerate(params['input_assembly_refs']):
+                # assembly obj info
+                try:
+                    [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = range(11)  # object_info tuple
+                    input_obj_info = wsClient.get_object_info_new ({'objects':[{'ref':input_ref}]})[0]
+                    input_obj_type = re.sub ('-[0-9]+\.[0-9]+$', "", input_obj_info[TYPE_I])  # remove trailing version
+                    input_obj_name = input_obj_info[NAME_I]
+
+                    self.log (console, "GETTING ASSEMBLY: "+str(input_ref)+" "+str(input_obj_name))  # DEBUG
+
+                except Exception as e:
+                    raise ValueError('Unable to get object from workspace: (' + input_ref +')' + str(e))
+                if input_obj_type not in accepted_input_types:
+                    raise ValueError ("Input object of type '"+input_obj_type+"' not accepted.  Must be one of "+", ".join(accepted_input_types))
+
+                # add members to assembly_ref list
+                if input_obj_type in assembly_obj_types:
+                    try:
+                        assembly_seen = assembly_refs_seen[input_ref]
+                        continue
+                    except:
+                        assembly_refs_seen[input_ref] = True
+                        assembly_refs.append(input_ref)
+                        assembly_names.append(input_obj_name)
+                elif input_obj_type != set_obj_type:
+                    raise ValueError ("bad obj type for input_ref: "+input_ref)
+                else:  # add assembly set members
+
+                    try:
+                        assemblySet_obj = setAPI_Client.get_assembly_set_v1 ({'ref':input_ref, 'include_item_info':1})
+                    except Exception as e:
+                        raise ValueError('Unable to get object from workspace: (' + input_ref +')' + str(e))
+                    
+                    for assembly_obj in assemblySet_obj['data']['items']:
+                        this_assembly_ref = assembly_obj['ref']
+                        try:
+                            assembly_seen = assembly_refs_seen[this_assembly_ref]
+                            continue
+                        except:
+                            assembly_refs_seen[this_assembly_ref] = True
+                            assembly_refs.append(this_assembly_ref)
+                            try:
+                                [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = range(11)  # object_info tuple
+                                this_input_obj_info = wsClient.get_object_info_new ({'objects':[{'ref':this_assembly_ref}]})[0]
+                                this_input_obj_type = re.sub ('-[0-9]+\.[0-9]+$', "", input_obj_info[TYPE_I])  # remove trailing version
+                                this_input_obj_name = this_input_obj_info[NAME_I]
+                                assembly_names.append(this_input_obj_name)
+                            except Exception as e:
+                                raise ValueError('Unable to get object from workspace: (' + this_assembly_ref +')' + str(e))
+
+
+        #### STEP 2: Get assemblies to score as fasta files
+        ##
+        if len(invalid_msgs) == 0:
+            self.log (console, "Retrieving Assemblies")  # DEBUG
+
+            #assembly_outdir = os.path.join (output_dir, 'score_assembly')
+            #if not os.path.exists(assembly_outdir):
+            #    os.makedirs(assembly_outdir)
+            score_assembly_file_paths = []
+
+            for ass_i,input_ref in enumerate(assembly_refs):
+                self.log (console, "\tAssembly: "+assembly_names[ass_i]+" ("+assembly_refs[ass_i]+")")  # DEBUG
+                contig_file = auClient.get_assembly_as_fasta({'ref':assembly_refs[ass_i]}).get('path')
+                sys.stdout.flush()
+                contig_file_path = dfuClient.unpack_file({'file_path': contig_file})['file_path']
+                score_assembly_file_paths.append(contig_file_path)
+                #clean_ass_ref = assembly_ref.replace('/','_')
+                #assembly_outfile_path = os.join(assembly_outdir, clean_assembly_ref+".fna")
+                #shutil.move(contig_file_path, assembly_outfile_path)
+
+
+        #### STEP 3: Get contig attributes and create filtered output files
+        ##
+        filtered_assembly_file_paths = []
+        original_contig_count = []
+        filtered_contig_count = []
+        if len(invalid_msgs) == 0:
+
+            # score fasta lens in contig files
+            read_buf_size  = 65536
+            write_buf_size = 65536
+
+            lens = []
+            for ass_i,assembly_file_path in enumerate(score_assembly_file_paths):
+                ass_name = assembly_names[ass_i]
+                self.log (console, "Reading contig lengths in assembly: "+ass_name)  # DEBUG
+
+                original_contig_count.append(0)
+                filtered_contig_count.append(0)
+                filtered_file_path = assembly_file_path+".min_contig_length="+str(params['min_contig_length'])+"bp"
+                with open (assembly_file_path, 'r', read_buf_size) as ass_handle, \
+                     open (filtered_file_path, 'w', write_buf_size) as filt_handle:
+                    seq_buf = ''
+                    last_header = ''
+                    for fasta_line in ass_handle:
+                        if fasta_line.startswith('>'):
+                            if seq_buf != '':
+                                original_contig_count[ass_i] += 1
+                                seq_len = len(seq_buf)
+                                if (seq_len >= int(params['min_contig_len']):
+                                    filtered_contig_count[ass_i] += 1
+                                    filt_handle.write(last_header+"\n")
+                                    filt_handle.write(seq_buf+"\n")
+                                seq_buf = ''
+                                last_header = fasta_line
+                        else:
+                            seq_buf += ''.join(fasta_line.split())
+                    if seq_buf != '':
+                        original_contig_count[ass_i] += 1
+                        seq_len = len(seq_buf)
+                        if (seq_len >= int(params['min_contig_len']):
+                            filtered_contig_count[ass_i] += 1
+                            filt_handle.write(last_header+"\n")
+                            filt_handle.write(seq_buf+"\n")
+                        seq_buf = ''
+
+        # HERE
+
+
+        # STEP 2: get the read library as deinterleaved fastq files
+        input_ref = params['read_library_ref']
+        reads_params = {'read_libraries': [input_ref],
+                        'interleaved': 'false',
+                        'gzipped': None
+                        }
+        ru = ReadsUtils(self.callbackURL)
+        reads = ru.download_reads(reads_params)['files']
+
+        print('Input reads files:')
+        fwd = reads[input_ref]['files']['fwd']
+        rev = reads[input_ref]['files']['rev']
+        pprint('forward: ' + fwd)
+        pprint('reverse: ' + rev)
+
+        # STEP 3: run megahit
+        # construct the command
+        megahit_cmd = [self.MEGAHIT]
+
+        # we only support PE reads, so add that
+        megahit_cmd.append('-1')
+        megahit_cmd.append(fwd)
+        megahit_cmd.append('-2')
+        megahit_cmd.append(rev)
+
+        # if a preset is defined, use that:
+        if 'megahit_parameter_preset' in params:
+            if params['megahit_parameter_preset']:
+                megahit_cmd.append('--presets')
+                megahit_cmd.append(params['megahit_parameter_preset'])
+
+        if 'min_count' in params:
+            if params['min_count']:
+                megahit_cmd.append('--min-count')
+                megahit_cmd.append(str(params['min_count']))
+        if 'k_min' in params:
+            if params['k_min']:
+                megahit_cmd.append('--k-min')
+                megahit_cmd.append(str(params['k_min']))
+        if 'k_max' in params:
+            if params['k_max']:
+                megahit_cmd.append('--k-max')
+                megahit_cmd.append(str(params['k_max']))
+        if 'k_step' in params:
+            if params['k_step']:
+                megahit_cmd.append('--k-step')
+                megahit_cmd.append(str(params['k_step']))
+        if 'k_list' in params:
+            if params['k_list']:
+                k_list = []
+                for k_val in params['k_list']:
+                    k_list.append(str(k_val))
+                megahit_cmd.append('--k-list')
+                megahit_cmd.append(','.join(k_list))
+
+        min_contig_length = self.DEFAULT_MIN_CONTIG_LENGTH
+        if 'min_contig_length' in params:
+            if params['min_contig_length']:
+                if str(params['min_contig_length']).isdigit():
+                    min_contig_length = params['min_contig_length']
+                else:
+                    raise ValueError('min_contig_length parameter must be a non-negative integer')
+
+        megahit_cmd.append('--min-contig-len')
+        megahit_cmd.append(str(min_contig_length))
+
+        # set the output location
+        timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() * 1000)
+        output_dir = os.path.join(self.scratch, 'output.' + str(timestamp))
+        megahit_cmd.append('-o')
+        megahit_cmd.append(output_dir)
+
+        # run megahit
+        print('running megahit:')
+        print('    ' + ' '.join(megahit_cmd))
+        p = subprocess.Popen(megahit_cmd, cwd=self.scratch, shell=False)
+        retcode = p.wait()
+
+        print('Return code: ' + str(retcode))
+        if p.returncode != 0:
+            raise ValueError('Error running MEGAHIT, return code: ' +
+                             str(retcode) + '\n')
+
+        output_contigs = os.path.join(output_dir, 'final.contigs.fa')
+
+        # on macs, we cannot run megahit in the shared host scratch space, so we need to move the file there
+        if self.mac_mode:
+            shutil.move(output_contigs, os.path.join(self.host_scratch, 'final.contigs.fa'))
+            output_contigs = os.path.join(self.host_scratch, 'final.contigs.fa')
+
+        # STEP 4: save the resulting assembly
+        assemblyUtil = AssemblyUtil(self.callbackURL)
+        output_data_ref = assemblyUtil.save_assembly_from_fasta({
+                                                                'file': {'path': output_contigs},
+                                                                'workspace_name': params['workspace_name'],
+                                                                'assembly_name': params['output_contigset_name']
+                                                                })
+
+
+        # STEP 5: generate and save the report
+
+        # compute a simple contig length distribution for the report
+        lengths = []
+        for seq_record in SeqIO.parse(output_contigs, 'fasta'):
+            lengths.append(len(seq_record.seq))
+
+        report = ''
+        report += 'ContigSet saved to: ' + params['workspace_name'] + '/' + params['output_contigset_name'] + '\n'
+        report += 'Assembled into ' + str(len(lengths)) + ' contigs.\n'
+        report += 'Avg Length: ' + str(sum(lengths) / float(len(lengths))) + ' bp.\n'
+
+        bins = 10
+        counts, edges = np.histogram(lengths, bins)
+        report += 'Contig Length Distribution (# of contigs -- min to max basepairs):\n'
+        for c in range(bins):
+            report += '   ' + str(counts[c]) + '\t--\t' + str(edges[c]) + ' to ' + str(edges[c + 1]) + ' bp\n'
+
+        print('Running QUAST')
+        kbq = kb_quast(self.callbackURL)
+        try:
+            quastret = kbq.run_QUAST({'files': [{'path': output_contigs,
+                                                 'label': params['output_contigset_name']}]})
+        except QUASTError as qe:
+            # not really any way to test this, all inputs have been checked earlier and should be
+            # ok 
+            print('Logging exception from running QUAST')
+            print(str(qe))
+            # TODO delete shock node
+            raise
+
+        print('Saving report')
+        kbr = KBaseReport(self.callbackURL)
+        try:
+            report_info = kbr.create_extended_report(
+                {'message': report,
+                 'objects_created': [{'ref': output_data_ref, 'description': 'Assembled contigs'}],
+                 'direct_html_link_index': 0,
+                 'html_links': [{'shock_id': quastret['shock_id'],
+                                 'name': 'report.html',
+                                 'label': 'QUAST report'}
+                                ],
+                 'report_object_name': 'kb_megahit_report_' + str(uuid.uuid4()),
+                 'workspace_name': params['workspace_name']
+                 })
+        except _RepError as re:
+            # not really any way to test this, all inputs have been checked earlier and should be
+            # ok 
+            print('Logging exception from creating report object')
+            print(str(re))
+            # TODO delete shock node
+            raise
+
+        # STEP 6: contruct the output to send back
+        output = {'report_name': report_info['name'], 'report_ref': report_info['ref']}
+
         #END run_filter_contigs_by_length
 
         # At some point might do deeper type checking...

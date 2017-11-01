@@ -46,7 +46,8 @@ class kb_assembly_compare(object):
            should just be used for workspace ** "name" is a string identifier
            of a workspace or object.  This is received from Narrative.),
            parameter "input_assembly_refs" of type "data_obj_ref", parameter
-           "output_name" of type "data_obj_name"
+           "min_contig_length" of Long, parameter "output_name" of type
+           "data_obj_name"
         :returns: instance of type "Filter_Contigs_by_Length_Output" ->
            structure: parameter "report_name" of type "data_obj_name",
            parameter "report_ref" of type "data_obj_ref"

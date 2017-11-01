@@ -29,6 +29,7 @@ module kb_assembly_compare {
     typedef structure {
         workspace_name workspace_name;
 	data_obj_ref   input_assembly_refs;   /* Assemblies or AssemblySets */
+	int            min_contig_length;
         data_obj_name  output_name;
     } Filter_Contigs_by_Length_Params;
 

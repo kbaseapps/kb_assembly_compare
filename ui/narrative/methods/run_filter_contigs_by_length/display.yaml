@@ -32,6 +32,11 @@ parameters :
             Assembly(s) or AssemblySet(s) <font color=red>*</font>
         short-hint : |
             Assemblies for comparing contig length distributions
+    min_contig_length:
+        ui-name : |
+            Min Contig Length <font color=red>*</font>
+        short-hint : |
+            Set the length threshold that all assembled contigs must meet or exceed
     output_name:
         ui-name : |
             Output name <font color=red>*</font>
