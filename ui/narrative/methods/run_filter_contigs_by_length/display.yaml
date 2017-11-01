@@ -3,7 +3,8 @@
 #
 name: Filter Assembled Contigs by Length
 tooltip: |
-    Extract contigs at least meeting a minimum length threshold
+    Extract longer contigs
+
 screenshots: []
 
 icon: kb-blue.png
