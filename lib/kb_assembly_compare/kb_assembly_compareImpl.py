@@ -412,11 +412,11 @@ class kb_assembly_compare:
             if non_zero_output_seen:
                 objects_created = []
                 if len(assembly_refs) > 1:
-                    objects_created.append({'ref': output_assemblySet_ref, 'description': params['output_name']+" filtered min_contig_len >= "+str(params['min_contig_length'])+"bp"})
+                    objects_created.append({'ref': output_assemblySet_ref, 'description': params['output_name']+" filtered min_contig_length >= "+str(params['min_contig_length'])+"bp"})
                 for ass_i,filtered_contig_ref in enumerate(filtered_contig_refs):
                     if filtered_contig_count[ass_i] == 0:
                         continue
-                    objects_created.append({'ref': filtered_contig_refs[ass_i], 'description': filtered_contig_names[ass_i]+" filtered min_contig_len >= "+str(params['min_contig_length'])+"bp"})
+                    objects_created.append({'ref': filtered_contig_refs[ass_i], 'description': filtered_contig_names[ass_i]+" filtered min_contig_length >= "+str(params['min_contig_length'])+"bp"})
 
         # Save report
         print('Saving report')
@@ -425,7 +425,7 @@ class kb_assembly_compare:
             report_info = kbr.create_extended_report(
                 {'message': report_text,
                  'objects_created': objects_created,
-                 'direct_html_link_index': 0,
+                 'direct_html_link_index': None,  # 0,
                  'html_links': None,
                  'file_links': None,
                  'report_object_name': 'kb_filter_contigs_by_length_report_' + str(uuid.uuid4()),
