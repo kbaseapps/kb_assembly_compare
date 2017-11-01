@@ -1,0 +1,81 @@
+{
+    "ver": "1.1.0",
+    "authors": [
+        "dylan"
+    ],
+    "contact": "help@kbase.us",
+    "visible": true,
+    "categories": ["active","util","assembly"],
+    "widgets": {
+        "input": null,
+        "output": "no-display"
+    },
+    "parameters": [ 
+        {
+            "id": "input_assembly_refs",
+            "optional": false,
+            "advanced": false,
+            "allow_multiple": true,
+            "default_values": [ "" ],
+            "field_type": "text",
+            "text_options": {
+                "valid_ws_types": [ "KBaseGenomeAnnotations.Assembly", "KBaseSets.AssemblySet" ],
+		"is_output_name": false
+            }
+        },
+        {
+            "id": "output_name",
+            "optional": false,
+            "advanced": false,
+            "allow_multiple": false,
+            "default_values": [ "" ],
+            "field_type": "text",
+            "text_options": {
+                "valid_ws_types": [ "KBaseGenomeAnnotations.Assembly", "KBaseSets.AssemblySet" ],
+		"is_output_name": true
+            }
+        }
+    ],
+
+    "behavior": {
+        "service-mapping": {
+            "url": "",
+            "name": "kb_assembly_compare",
+            "method": "run_filter_contigs_by_length",
+            "input_mapping": [
+                {
+                    "narrative_system_variable": "workspace",
+                    "target_property": "workspace_name"
+                },
+                {
+                    "input_parameter": "input_assembly_refs",
+                    "target_property": "input_assembly_refs",
+		    "target_type_transform": "list<resolved-ref>"
+                },
+                {
+                    "input_parameter": "output_name",
+                    "target_property": "output_name"
+                }
+            ],
+            "output_mapping": [
+                {
+                    "narrative_system_variable": "workspace",
+                    "target_property": "workspace_name"
+                },
+                {
+                    "service_method_output_path": [0, "report_name"],
+                    "target_property": "report_name"
+                },
+                {
+                    "service_method_output_path": [0, "report_ref"],
+                    "target_property": "report_ref"
+                },
+                {
+		    "constant_value": "5",
+                    "target_property": "report_window_line_height"
+                }
+            ]
+        }
+    },
+    "job_id_output_field": "docker"
+}
