@@ -51,9 +51,9 @@ class kb_assembly_compare:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "1.1.0"
+    VERSION = "1.1.1"
     GIT_URL = "https://github.com/dcchivian/kb_assembly_compare"
-    GIT_COMMIT_HASH = "528c94025339f595747e83c90d8f337cdfb56572"
+    GIT_COMMIT_HASH = "72b1ba1834906822493691b75222bd5337f5f3ae"
 
     #BEGIN_CLASS_HEADER
     workspaceURL     = None
