@@ -1,3 +1,7 @@
+### Version 1.1.1
+__Changes__
+- made histogram plots in "Compare Assembled Contig Distributions be a compressed directory"
+
 ### Version 1.1.0
 __Changes__
 - added App "Filter Assembled Contigs by Length"

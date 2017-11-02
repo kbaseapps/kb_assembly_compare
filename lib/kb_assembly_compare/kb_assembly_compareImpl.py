@@ -51,9 +51,9 @@ class kb_assembly_compare:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "1.1.0"
-    GIT_URL = "https://github.com/dcchivian/kb_assembly_compare"
-    GIT_COMMIT_HASH = "528c94025339f595747e83c90d8f337cdfb56572"
+    VERSION = "1.1.1"
+    GIT_URL = "https://github.com/kbaseapps/kb_assembly_compare"
+    GIT_COMMIT_HASH = "72b1ba1834906822493691b75222bd5337f5f3ae"
 
     #BEGIN_CLASS_HEADER
     workspaceURL     = None
@@ -343,8 +343,6 @@ class kb_assembly_compare:
                         output_obj_name = params['output_name']
                     else:
                         output_obj_name = assembly_names[ass_i]+".min_contig_length"+str(params['min_contig_length'])+"bp"
-                    filtered_contig_names.append(output_obj_name)
-
                     output_data_ref = auClient.save_assembly_from_fasta({
                         'file': {'path': filtered_contig_file},
                         'workspace_name': params['workspace_name'],
@@ -400,10 +398,10 @@ class kb_assembly_compare:
         else:
             # report text
             if len(assembly_refs) > 1 and non_zero_output_seen:
-                report_text += 'AssemblySet saved to: ' + params['workspace_name'] + '/' + params['output_name'] + '\n'
+                report_text += 'AssemblySet saved to: ' + params['workspace_name'] + '/' + params['output_name'] + "\n\n"
             for ass_i,filtered_contig_file in enumerate(filtered_contig_file_paths):
                 report_text += 'ORIGINAL Contig count: '+str(original_contig_count[ass_i])+"\t"+'in Assembly '+assembly_names[ass_i]+"\n"
-                report_text += 'FILTERED Contig count: '+str(filtered_contig_count[ass_i])+"\t"+'in Assembly '+filtered_contig_names[ass_i]+"\n"
+                report_text += 'FILTERED Contig count: '+str(filtered_contig_count[ass_i])+"\t"+'in Assembly '+filtered_contig_names[ass_i]+"\n\n"
                 if filtered_contig_count[ass_i] == 0:
                     report_text += "  (no output object created for "+filtered_contig_names[ass_i]+")"+"\n"
 
@@ -538,6 +536,9 @@ class kb_assembly_compare:
         html_output_dir = os.path.join(output_dir,'html')
         if not os.path.exists(html_output_dir):
             os.makedirs(html_output_dir)
+        hist_output_dir = os.path.join(html_output_dir,'histograms')
+        if not os.path.exists(hist_output_dir):
+            os.makedirs(hist_output_dir)
 
 
         #### STEP 1: get assembly refs
@@ -1205,11 +1206,12 @@ class kb_assembly_compare:
                 hist_lens_png_files[ass_i].append(png_file)
                 pdf_file = plot_name+".pdf"
                 hist_lens_pdf_files[ass_i].append(pdf_file)
-                output_png_file_path = os.path.join (html_output_dir, png_file)
-                output_pdf_file_path = os.path.join (html_output_dir, pdf_file)
+                output_png_file_path = os.path.join (hist_output_dir, png_file)
+                output_pdf_file_path = os.path.join (hist_output_dir, pdf_file)
                 fig.savefig (output_png_file_path, dpi=img_dpi)
                 fig.savefig (output_pdf_file_path, format='pdf')
 
+                """
                 # upload PNG
                 try:
                     upload_ret = dfuClient.file_to_shock({'file_path': output_png_file_path,
@@ -1232,7 +1234,7 @@ class kb_assembly_compare:
                                       )
                 except:
                     raise ValueError ('Logging exception loading pdf_file '+pdf_file+' to shock')
-
+                """
 
         #### STEP 6: Create and Upload HTML Report
         ##
@@ -1434,7 +1436,22 @@ class kb_assembly_compare:
             raise ValueError ('Logging exception loading html_report to shock')
 
 
-        #### STEP N: Build report
+        #### STEP 7
+        ##
+        try:
+            hist_upload_ret = dfuClient.file_to_shock({'file_path': hist_output_dir,
+                                                       'make_handle': 0,
+                                                       'pack': 'zip'})
+            file_links.append({'shock_id': hist_upload_ret['shock_id'],
+                               'name': 'histogram_figures',
+                               'label': 'Histogram Figures'
+                           })
+        except:
+            raise ValueError ('Logging exception loading html_report to shock')
+
+
+
+        #### STEP 8: Build report
         ##
         reportName = 'run_contig_distribution_compare_report_'+str(uuid.uuid4())
         reportObj = {'objects_created': [],
