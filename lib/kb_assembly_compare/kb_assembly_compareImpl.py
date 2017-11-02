@@ -1151,7 +1151,7 @@ class kb_assembly_compare:
                 long_len = max_len
                 if hist_i < len(top_hist_cnt)-1:
                     long_len = max_hist_val_accept[hist_i]
-                plot_name = "hist_len_plot-"+ass_name+":"+str(min_hist_val_accept[hist_i])+"-"+str(long_len)
+                plot_name = "hist_len_plot-"+ass_name+"_hist_window_"+str(min_hist_val_accept[hist_i])+"-"+str(long_len)
                 plot_name_desc = "Histogram of Contig Lengths "+str(min_hist_val_accept[hist_i])+"-"+str(long_len)+" (in bp)"
                 self.log (console, "GENERATING PLOT for "+ass_name+" "+plot_name_desc)
                 img_dpi = 200
