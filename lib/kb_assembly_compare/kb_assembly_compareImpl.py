@@ -343,8 +343,6 @@ class kb_assembly_compare:
                         output_obj_name = params['output_name']
                     else:
                         output_obj_name = assembly_names[ass_i]+".min_contig_length"+str(params['min_contig_length'])+"bp"
-                    filtered_contig_names.append(output_obj_name)
-
                     output_data_ref = auClient.save_assembly_from_fasta({
                         'file': {'path': filtered_contig_file},
                         'workspace_name': params['workspace_name'],
@@ -400,10 +398,10 @@ class kb_assembly_compare:
         else:
             # report text
             if len(assembly_refs) > 1 and non_zero_output_seen:
-                report_text += 'AssemblySet saved to: ' + params['workspace_name'] + '/' + params['output_name'] + '\n'
+                report_text += 'AssemblySet saved to: ' + params['workspace_name'] + '/' + params['output_name'] + "\n\n"
             for ass_i,filtered_contig_file in enumerate(filtered_contig_file_paths):
                 report_text += 'ORIGINAL Contig count: '+str(original_contig_count[ass_i])+"\t"+'in Assembly '+assembly_names[ass_i]+"\n"
-                report_text += 'FILTERED Contig count: '+str(filtered_contig_count[ass_i])+"\t"+'in Assembly '+filtered_contig_names[ass_i]+"\n"
+                report_text += 'FILTERED Contig count: '+str(filtered_contig_count[ass_i])+"\t"+'in Assembly '+filtered_contig_names[ass_i]+"\n\n"
                 if filtered_contig_count[ass_i] == 0:
                     report_text += "  (no output object created for "+filtered_contig_names[ass_i]+")"+"\n"
 
