@@ -536,7 +536,8 @@ class kb_assembly_compare:
         html_output_dir = os.path.join(output_dir,'html')
         if not os.path.exists(html_output_dir):
             os.makedirs(html_output_dir)
-        hist_output_dir = os.path.join(html_output_dir,'histograms')
+        hist_folder_name = 'histograms'
+        hist_output_dir = os.path.join(html_output_dir,hist_folder_name)
         if not os.path.exists(hist_output_dir):
             os.makedirs(hist_output_dir)
 
@@ -1203,9 +1204,9 @@ class kb_assembly_compare:
                 # save plot
                 self.log (console, "SAVING PLOT "+plot_name_desc)
                 png_file = plot_name+".png"
-                hist_lens_png_files[ass_i].append(png_file)
+                hist_lens_png_files[ass_i].append(hist_folder_name+'/'+png_file)
                 pdf_file = plot_name+".pdf"
-                hist_lens_pdf_files[ass_i].append(pdf_file)
+                hist_lens_pdf_files[ass_i].append(hist_folder_name+'/'+pdf_file)
                 output_png_file_path = os.path.join (hist_output_dir, png_file)
                 output_pdf_file_path = os.path.join (hist_output_dir, pdf_file)
                 fig.savefig (output_png_file_path, dpi=img_dpi)
@@ -1443,7 +1444,7 @@ class kb_assembly_compare:
                                                        'make_handle': 0,
                                                        'pack': 'zip'})
             file_links.append({'shock_id': hist_upload_ret['shock_id'],
-                               'name': 'histogram_figures',
+                               'name': 'histogram_figures.zip',
                                'label': 'Histogram Figures'
                            })
         except:
