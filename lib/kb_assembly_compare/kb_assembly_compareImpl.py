@@ -52,7 +52,7 @@ class kb_assembly_compare:
     # the latter method is running.
     ######################################### noqa
     VERSION = "1.1.1"
-    GIT_URL = "https://github.com/dcchivian/kb_assembly_compare"
+    GIT_URL = "https://github.com/kbaseapps/kb_assembly_compare"
     GIT_COMMIT_HASH = "72b1ba1834906822493691b75222bd5337f5f3ae"
 
     #BEGIN_CLASS_HEADER
@@ -536,6 +536,9 @@ class kb_assembly_compare:
         html_output_dir = os.path.join(output_dir,'html')
         if not os.path.exists(html_output_dir):
             os.makedirs(html_output_dir)
+        hist_output_dir = os.path.join(html_output_dir,'histograms')
+        if not os.path.exists(hist_output_dir):
+            os.makedirs(hist_output_dir)
 
 
         #### STEP 1: get assembly refs
@@ -1203,11 +1206,12 @@ class kb_assembly_compare:
                 hist_lens_png_files[ass_i].append(png_file)
                 pdf_file = plot_name+".pdf"
                 hist_lens_pdf_files[ass_i].append(pdf_file)
-                output_png_file_path = os.path.join (html_output_dir, png_file)
-                output_pdf_file_path = os.path.join (html_output_dir, pdf_file)
+                output_png_file_path = os.path.join (hist_output_dir, png_file)
+                output_pdf_file_path = os.path.join (hist_output_dir, pdf_file)
                 fig.savefig (output_png_file_path, dpi=img_dpi)
                 fig.savefig (output_pdf_file_path, format='pdf')
 
+                """
                 # upload PNG
                 try:
                     upload_ret = dfuClient.file_to_shock({'file_path': output_png_file_path,
@@ -1230,7 +1234,7 @@ class kb_assembly_compare:
                                       )
                 except:
                     raise ValueError ('Logging exception loading pdf_file '+pdf_file+' to shock')
-
+                """
 
         #### STEP 6: Create and Upload HTML Report
         ##
@@ -1432,7 +1436,22 @@ class kb_assembly_compare:
             raise ValueError ('Logging exception loading html_report to shock')
 
 
-        #### STEP N: Build report
+        #### STEP 7
+        ##
+        try:
+            hist_upload_ret = dfuClient.file_to_shock({'file_path': hist_output_dir,
+                                                       'make_handle': 0,
+                                                       'pack': 'zip'})
+            file_links.append({'shock_id': hist_upload_ret['shock_id'],
+                               'name': 'histogram_figures',
+                               'label': 'Histogram Figures'
+                           })
+        except:
+            raise ValueError ('Logging exception loading html_report to shock')
+
+
+
+        #### STEP 8: Build report
         ##
         reportName = 'run_contig_distribution_compare_report_'+str(uuid.uuid4())
         reportObj = {'objects_created': [],
