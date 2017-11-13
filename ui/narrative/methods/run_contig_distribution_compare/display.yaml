@@ -1,7 +1,7 @@
 #
 # define display information
 #
-name: Compare Assembled Contig Distributions
+name: Compare Assembled Contig Distributions - v1.1.2
 tooltip: |
     View distributions of contig characteristics for different assemblies
 screenshots:
