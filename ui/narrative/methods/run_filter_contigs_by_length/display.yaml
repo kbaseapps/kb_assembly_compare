@@ -1,7 +1,7 @@
 #
 # define display information
 #
-name: Filter Assembled Contigs by Length
+name: Filter Assembled Contigs by Length - v1.1.2
 tooltip: |
     Extract longer contigs
 

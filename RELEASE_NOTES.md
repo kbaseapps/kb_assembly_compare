@@ -1,3 +1,7 @@
+### Version 1.1.2
+__Changes__
+- changed contact address from email to url
+
 ### Version 1.1.1
 __Changes__
 - made histogram plots in "Compare Assembled Contig Distributions be a compressed directory"
