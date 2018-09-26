@@ -54,3 +54,9 @@ description : |
     </ul>
     </p>
     <p><b><i>Downloadable files:</i></b> All the plots from this App are available for download in both PNG image and PDF document formats.  The HTML report may be saved using the browser.</p>
+
+publications :
+    -
+        display-text: |
+            Arkin AP, Cottingham RW, Henry CS, Harris NL, Stevens RL, Maslov S, et al. KBase: The United States Department of Energy Systems Biology Knowledgebase. Nature Biotechnology. 2018;36: 566. doi: 10.1038/nbt.4163
+        link: https://www.nature.com/articles/nbt.4163
