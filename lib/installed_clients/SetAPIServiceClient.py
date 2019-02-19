@@ -12,7 +12,7 @@ from __future__ import print_function
 try:
     # baseclient and this client are in a package
     from .baseclient import BaseClient as _BaseClient  # @UnusedImport
-except:
+except ImportError:
     # no they aren't
     from baseclient import BaseClient as _BaseClient  # @Reimport
 
@@ -23,7 +23,7 @@ class SetAPI(object):
             self, url=None, timeout=30 * 60, user_id=None,
             password=None, token=None, ignore_authrc=False,
             trust_all_ssl_certificates=False,
-            auth_svc='https://kbase.us/services/authorization/Sessions/Login',
+            auth_svc='https://ci.kbase.us/services/auth/api/legacy/KBase/Sessions/Login',
             service_ver='release'):
         if url is None:
             url = 'https://kbase.us/services/service_wizard'
@@ -161,9 +161,8 @@ class SetAPI(object):
            key-value pairs provided by the user.) -> mapping from String to
            String
         """
-        return self._client.call_method(
-            'SetAPI.get_differential_expression_matrix_set_v1',
-            [params], self._service_ver, context)
+        return self._client.call_method('SetAPI.get_differential_expression_matrix_set_v1',
+                                        [params], self._service_ver, context)
 
     def save_differential_expression_matrix_set_v1(self, params, context=None):
         """
@@ -284,9 +283,8 @@ class SetAPI(object):
            key-value pairs provided by the user.) -> mapping from String to
            String
         """
-        return self._client.call_method(
-            'SetAPI.save_differential_expression_matrix_set_v1',
-            [params], self._service_ver, context)
+        return self._client.call_method('SetAPI.save_differential_expression_matrix_set_v1',
+                                        [params], self._service_ver, context)
 
     def get_feature_set_set_v1(self, params, context=None):
         """
@@ -407,9 +405,8 @@ class SetAPI(object):
            metadata about an object. Arbitrary key-value pairs provided by
            the user.) -> mapping from String to String
         """
-        return self._client.call_method(
-            'SetAPI.get_feature_set_set_v1',
-            [params], self._service_ver, context)
+        return self._client.call_method('SetAPI.get_feature_set_set_v1',
+                                        [params], self._service_ver, context)
 
     def save_feature_set_set_v1(self, params, context=None):
         """
@@ -526,9 +523,8 @@ class SetAPI(object):
            key-value pairs provided by the user.) -> mapping from String to
            String
         """
-        return self._client.call_method(
-            'SetAPI.save_feature_set_set_v1',
-            [params], self._service_ver, context)
+        return self._client.call_method('SetAPI.save_feature_set_set_v1',
+                                        [params], self._service_ver, context)
 
     def get_expression_set_v1(self, params, context=None):
         """
@@ -653,9 +649,8 @@ class SetAPI(object):
            key-value pairs provided by the user.) -> mapping from String to
            String
         """
-        return self._client.call_method(
-            'SetAPI.get_expression_set_v1',
-            [params], self._service_ver, context)
+        return self._client.call_method('SetAPI.get_expression_set_v1',
+                                        [params], self._service_ver, context)
 
     def save_expression_set_v1(self, params, context=None):
         """
@@ -775,9 +770,8 @@ class SetAPI(object):
            key-value pairs provided by the user.) -> mapping from String to
            String
         """
-        return self._client.call_method(
-            'SetAPI.save_expression_set_v1',
-            [params], self._service_ver, context)
+        return self._client.call_method('SetAPI.save_expression_set_v1',
+                                        [params], self._service_ver, context)
 
     def get_reads_alignment_set_v1(self, params, context=None):
         """
@@ -904,9 +898,8 @@ class SetAPI(object):
            key-value pairs provided by the user.) -> mapping from String to
            String
         """
-        return self._client.call_method(
-            'SetAPI.get_reads_alignment_set_v1',
-            [params], self._service_ver, context)
+        return self._client.call_method('SetAPI.get_reads_alignment_set_v1',
+                                        [params], self._service_ver, context)
 
     def save_reads_alignment_set_v1(self, params, context=None):
         """
@@ -1026,9 +1019,8 @@ class SetAPI(object):
            key-value pairs provided by the user.) -> mapping from String to
            String
         """
-        return self._client.call_method(
-            'SetAPI.save_reads_alignment_set_v1',
-            [params], self._service_ver, context)
+        return self._client.call_method('SetAPI.save_reads_alignment_set_v1',
+                                        [params], self._service_ver, context)
 
     def get_reads_set_v1(self, params, context=None):
         """
@@ -1150,9 +1142,8 @@ class SetAPI(object):
            key-value pairs provided by the user.) -> mapping from String to
            String
         """
-        return self._client.call_method(
-            'SetAPI.get_reads_set_v1',
-            [params], self._service_ver, context)
+        return self._client.call_method('SetAPI.get_reads_set_v1',
+                                        [params], self._service_ver, context)
 
     def save_reads_set_v1(self, params, context=None):
         """
@@ -1268,9 +1259,8 @@ class SetAPI(object):
            key-value pairs provided by the user.) -> mapping from String to
            String
         """
-        return self._client.call_method(
-            'SetAPI.save_reads_set_v1',
-            [params], self._service_ver, context)
+        return self._client.call_method('SetAPI.save_reads_set_v1',
+                                        [params], self._service_ver, context)
 
     def get_assembly_set_v1(self, params, context=None):
         """
@@ -1388,9 +1378,8 @@ class SetAPI(object):
            metadata about an object. Arbitrary key-value pairs provided by
            the user.) -> mapping from String to String
         """
-        return self._client.call_method(
-            'SetAPI.get_assembly_set_v1',
-            [params], self._service_ver, context)
+        return self._client.call_method('SetAPI.get_assembly_set_v1',
+                                        [params], self._service_ver, context)
 
     def save_assembly_set_v1(self, params, context=None):
         """
@@ -1504,9 +1493,8 @@ class SetAPI(object):
            key-value pairs provided by the user.) -> mapping from String to
            String
         """
-        return self._client.call_method(
-            'SetAPI.save_assembly_set_v1',
-            [params], self._service_ver, context)
+        return self._client.call_method('SetAPI.save_assembly_set_v1',
+                                        [params], self._service_ver, context)
 
     def get_genome_set_v1(self, params, context=None):
         """
@@ -1623,9 +1611,8 @@ class SetAPI(object):
            key-value pairs provided by the user.) -> mapping from String to
            String
         """
-        return self._client.call_method(
-            'SetAPI.get_genome_set_v1',
-            [params], self._service_ver, context)
+        return self._client.call_method('SetAPI.get_genome_set_v1',
+                                        [params], self._service_ver, context)
 
     def save_genome_set_v1(self, params, context=None):
         """
@@ -1737,9 +1724,8 @@ class SetAPI(object):
            key-value pairs provided by the user.) -> mapping from String to
            String
         """
-        return self._client.call_method(
-            'SetAPI.save_genome_set_v1',
-            [params], self._service_ver, context)
+        return self._client.call_method('SetAPI.save_genome_set_v1',
+                                        [params], self._service_ver, context)
 
     def create_sample_set(self, params, context=None):
         """
@@ -1799,9 +1785,8 @@ class SetAPI(object):
            key-value pairs provided by the user.) -> mapping from String to
            String
         """
-        return self._client.call_method(
-            'SetAPI.create_sample_set',
-            [params], self._service_ver, context)
+        return self._client.call_method('SetAPI.create_sample_set',
+                                        [params], self._service_ver, context)
 
     def list_sets(self, params, context=None):
         """
@@ -1978,9 +1963,8 @@ class SetAPI(object):
            the user.) -> mapping from String to String, parameter
            "raw_data_palette_refs" of mapping from String to String
         """
-        return self._client.call_method(
-            'SetAPI.list_sets',
-            [params], self._service_ver, context)
+        return self._client.call_method('SetAPI.list_sets',
+                                        [params], self._service_ver, context)
 
     def get_set_items(self, params, context=None):
         """
@@ -2099,9 +2083,8 @@ class SetAPI(object):
            String, parameter "dp_ref" of type "ws_obj_id" (The workspace ID
            for a any data object. @id ws)
         """
-        return self._client.call_method(
-            'SetAPI.get_set_items',
-            [params], self._service_ver, context)
+        return self._client.call_method('SetAPI.get_set_items',
+                                        [params], self._service_ver, context)
 
     def status(self, context=None):
         return self._client.call_method('SetAPI.status',
