@@ -119,9 +119,6 @@ class kb_assembly_compare:
         # return variables are: returnVal
         #BEGIN run_filter_contigs_by_length
 
-        # very strange, re import from above isn't being retained in this scope
-        import re
-
         #### Step 0: basic init
         ##
         console = []
@@ -419,23 +416,12 @@ class kb_assembly_compare:
         # Save report
         print('Saving report')
         kbr = KBaseReport(self.callbackURL)
-        try:
-            report_info = kbr.create_extended_report(
-                {'message': report_text,
-                 'objects_created': objects_created,
-                 'direct_html_link_index': None,  # 0,
-                 'html_links': None,
-                 'file_links': None,
-                 'report_object_name': 'kb_filter_contigs_by_length_report_' + str(uuid.uuid4()),
-                 'workspace_name': params['workspace_name']
-                 })
-        except _RepError as re:
-            # not really any way to test this, all inputs have been checked earlier and should be
-            # ok 
-            print('Logging exception from creating report object')
-            print(str(re))
-            # TODO delete shock node
-            raise
+        report_info = kbr.create_extended_report(
+            {'message': report_text,
+             'objects_created': objects_created,
+             'report_object_name': 'kb_filter_contigs_by_length_report_' + str(uuid.uuid4()),
+             'workspace_name': params['workspace_name']
+             })
 
         # STEP 6: contruct the output to send back
         returnVal = {'report_name': report_info['name'], 'report_ref': report_info['ref']}
