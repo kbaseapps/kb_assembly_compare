@@ -1,3 +1,7 @@
+### Version 1.1.5
+__Changes__
+- Update to Python 3
+
 ### Version 1.1.4
 __Changes__
 - changed base image to sdkbase2 and removed extra cert install from Dockerfile
