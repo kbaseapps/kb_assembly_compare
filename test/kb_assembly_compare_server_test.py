@@ -1,25 +1,17 @@
 # -*- coding: utf-8 -*-
-import unittest
 import os  # noqa: F401
-import json  # noqa: F401
-import time
-import requests
 import shutil
-
+import time
+import unittest
+from configparser import ConfigParser  # py3
 from os import environ
-try:
-    from ConfigParser import ConfigParser  # py2
-except:
-    from configparser import ConfigParser  # py3
-
 from pprint import pprint  # noqa: F401
 
-from Workspace.WorkspaceClient import Workspace as workspaceService
-from AssemblyUtil.AssemblyUtilClient import AssemblyUtil
-from SetAPI.SetAPIServiceClient import SetAPI
+from installed_clients.AssemblyUtilClient import AssemblyUtil
+from installed_clients.WorkspaceClient import Workspace as workspaceService
+from kb_assembly_compare.authclient import KBaseAuth as _KBaseAuth
 from kb_assembly_compare.kb_assembly_compareImpl import kb_assembly_compare
 from kb_assembly_compare.kb_assembly_compareServer import MethodContext
-from kb_assembly_compare.authclient import KBaseAuth as _KBaseAuth
 
 
 class kb_assembly_compareTest(unittest.TestCase):

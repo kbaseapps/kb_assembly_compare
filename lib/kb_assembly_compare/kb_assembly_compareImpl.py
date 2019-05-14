@@ -1,36 +1,24 @@
 # -*- coding: utf-8 -*-
 #BEGIN_HEADER
-from __future__ import print_function
-from __future__ import division
-
+import math
 import os
-import sys
-import shutil
-import hashlib
-import subprocess
-import requests
-requests.packages.urllib3.disable_warnings()
 import re
-import traceback
+import sys
 import uuid
 from datetime import datetime
 from pprint import pprint, pformat
 
-import numpy as np
-import math
-#from Bio import SeqIO
-#import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle
-#from matplotlib.patches import Arc
-#from matplotlib.patches import Rectangle
+import numpy as np
 
-from Workspace.WorkspaceClient import Workspace as workspaceService
-from AssemblyUtil.AssemblyUtilClient import AssemblyUtil
-from DataFileUtil.DataFileUtilClient import DataFileUtil as DFUClient
-from SetAPI.SetAPIServiceClient import SetAPI
-from KBaseReport.KBaseReportClient import KBaseReport
+from installed_clients.AssemblyUtilClient import AssemblyUtil
+from installed_clients.DataFileUtilClient import DataFileUtil as DFUClient
+from installed_clients.KBaseReportClient import KBaseReport
+from installed_clients.SetAPIServiceClient import SetAPI
+from installed_clients.WorkspaceClient import Workspace as workspaceService
 
+[OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I,
+ SIZE_I, META_I] = list(range(11))  # object_info tuple
 #END_HEADER
 
 
@@ -51,9 +39,9 @@ class kb_assembly_compare:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "1.1.2"
-    GIT_URL = "https://github.com/kbaseapps/kb_assembly_compare"
-    GIT_COMMIT_HASH = "72b1ba1834906822493691b75222bd5337f5f3ae"
+    VERSION = "1.1.4"
+    GIT_URL = "https://github.com/kbaseapps/kb_assembly_compare.git"
+    GIT_COMMIT_HASH = "f148606736966821e865d6aa61cf5ff70ab695a8"
 
     #BEGIN_CLASS_HEADER
     workspaceURL     = None
@@ -118,9 +106,6 @@ class kb_assembly_compare:
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN run_filter_contigs_by_length
-
-        # very strange, re import from above isn't being retained in this scope
-        import re
 
         #### Step 0: basic init
         ##
@@ -198,12 +183,12 @@ class kb_assembly_compare:
             assembly_refs = []
             assembly_names = []
             assembly_refs_seen = dict()
-        
+
             for i,input_ref in enumerate(params['input_assembly_refs']):
 
                 # assembly obj info
                 try:
-                    [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = range(11)  # object_info tuple
+
                     input_obj_info = wsClient.get_object_info_new ({'objects':[{'ref':input_ref}]})[0]
                     #print ("INPUT_OBJ_INFO")
                     #pprint(input_obj_info)  # DEBUG
@@ -233,7 +218,7 @@ class kb_assembly_compare:
                         assemblySet_obj = setAPI_Client.get_assembly_set_v1 ({'ref':input_ref, 'include_item_info':1})
                     except Exception as e:
                         raise ValueError('Unable to get object from workspace: (' + input_ref +')' + str(e))
-                    
+
                     for assembly_obj in assemblySet_obj['data']['items']:
                         this_assembly_ref = assembly_obj['ref']
                         try:
@@ -243,7 +228,7 @@ class kb_assembly_compare:
                             assembly_refs_seen[this_assembly_ref] = True
                             assembly_refs.append(this_assembly_ref)
                             try:
-                                [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = range(11)  # object_info tuple
+
                                 this_input_obj_info = wsClient.get_object_info_new ({'objects':[{'ref':this_assembly_ref}]})[0]
                                 this_input_obj_type = re.sub ('-[0-9]+\.[0-9]+$', "", input_obj_info[TYPE_I])  # remove trailing version
                                 this_input_obj_name = this_input_obj_info[NAME_I]
@@ -359,12 +344,12 @@ class kb_assembly_compare:
                     self.log (console, "adding filtered assembly: "+filtered_contig_names[ass_i])
                     items.append({'ref': filtered_contig_refs[ass_i],
                                   'label': filtered_contig_names[ass_i],
-                                  #'data_attachment': ,                         
-                                  #'info'                                       
+                                  #'data_attachment': ,
+                                  #'info'
                               })
 
                 # load the method provenance from the context object                 
-                self.log(console,"SETTING PROVENANCE")  # DEBUG                      
+                self.log(console,"SETTING PROVENANCE")  # DEBUG
                 provenance = [{}]
                 if 'provenance' in ctx:
                     provenance = ctx['provenance']
@@ -419,23 +404,12 @@ class kb_assembly_compare:
         # Save report
         print('Saving report')
         kbr = KBaseReport(self.callbackURL)
-        try:
-            report_info = kbr.create_extended_report(
-                {'message': report_text,
-                 'objects_created': objects_created,
-                 'direct_html_link_index': None,  # 0,
-                 'html_links': None,
-                 'file_links': None,
-                 'report_object_name': 'kb_filter_contigs_by_length_report_' + str(uuid.uuid4()),
-                 'workspace_name': params['workspace_name']
-                 })
-        except _RepError as re:
-            # not really any way to test this, all inputs have been checked earlier and should be
-            # ok 
-            print('Logging exception from creating report object')
-            print(str(re))
-            # TODO delete shock node
-            raise
+        report_info = kbr.create_extended_report(
+            {'message': report_text,
+             'objects_created': objects_created,
+             'report_object_name': 'kb_filter_contigs_by_length_report_' + str(uuid.uuid4()),
+             'workspace_name': params['workspace_name']
+             })
 
         # STEP 6: contruct the output to send back
         returnVal = {'report_name': report_info['name'], 'report_ref': report_info['ref']}
@@ -551,11 +525,11 @@ class kb_assembly_compare:
             assembly_refs = []
             assembly_names = []
             assembly_refs_seen = dict()
-        
+
             for i,input_ref in enumerate(params['input_assembly_refs']):
                 # assembly obj info
                 try:
-                    [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = range(11)  # object_info tuple
+
                     input_obj_info = wsClient.get_object_info_new ({'objects':[{'ref':input_ref}]})[0]
                     input_obj_type = re.sub ('-[0-9]+\.[0-9]+$', "", input_obj_info[TYPE_I])  # remove trailing version
                     input_obj_name = input_obj_info[NAME_I]
@@ -584,7 +558,7 @@ class kb_assembly_compare:
                         assemblySet_obj = setAPI_Client.get_assembly_set_v1 ({'ref':input_ref, 'include_item_info':1})
                     except Exception as e:
                         raise ValueError('Unable to get object from workspace: (' + input_ref +')' + str(e))
-                    
+
                     for assembly_obj in assemblySet_obj['data']['items']:
                         this_assembly_ref = assembly_obj['ref']
                         try:
@@ -594,7 +568,7 @@ class kb_assembly_compare:
                             assembly_refs_seen[this_assembly_ref] = True
                             assembly_refs.append(this_assembly_ref)
                             try:
-                                [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = range(11)  # object_info tuple
+
                                 this_input_obj_info = wsClient.get_object_info_new ({'objects':[{'ref':this_assembly_ref}]})[0]
                                 this_input_obj_type = re.sub ('-[0-9]+\.[0-9]+$', "", input_obj_info[TYPE_I])  # remove trailing version
                                 this_input_obj_name = this_input_obj_info[NAME_I]
@@ -708,7 +682,7 @@ class kb_assembly_compare:
             for ass_i,ass_name in enumerate(assembly_names):
                 if total_lens[ass_i] > max_total:
                     max_total = total_lens[ass_i]
-                
+
             """
             # DEBUG
             self.log (console, "SORTED VALS\n================================")
@@ -753,7 +727,7 @@ class kb_assembly_compare:
 
             # count buckets and transform lens to log of length for hist
             #hist_window_width = 10000  # make it log scale?
-            #N_hist_windows = int(max_len % hist_window_width)  
+            #N_hist_windows = int(max_len % hist_window_width)
             #len_buckets = [ 1000000, 500000, 100000, 50000, 10000, 5000, 1000, 500, 0 ]
             summary_stats = []
             cumulative_len_stats = []
@@ -770,7 +744,7 @@ class kb_assembly_compare:
             for ass_i,ass_name in enumerate(assembly_names):
                 self.log (console, "Building summary and histograms from assembly: "+ass_name)  # DEBUG
                 #lens[ass_i].sort(key=int, reverse=True)  # sorting is critical.  Already sorted
-                
+
                 # hist
                 """
                 # get log lens
@@ -872,7 +846,7 @@ class kb_assembly_compare:
 
         #### STEP 5: Make figures with matplotlib
         ##
-        file_links = [] 
+        file_links = []
         shared_img_in_height = 4.0
         total_ass = len(assembly_names)
 
@@ -1386,7 +1360,7 @@ class kb_assembly_compare:
                 # N50, L50, etc.
                 if sub_i > 0:
                     html_report_lines += ['<tr>']
-                
+
                 if (sub_i % 2) == 0:
                     cell_color = get_cell_color (N[perc][ass_i], best_val['N'][perc], worst_val['N'][perc])
                     html_report_lines += ['<td align="center"'+bottom_edge+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+'N'+str(perc)+':</font></td><td bgcolor="'+cell_color+'" align="right"'+edges+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+sp+str(N[perc][ass_i])+'</font></td>']
@@ -1401,7 +1375,7 @@ class kb_assembly_compare:
                 else:
                     html_report_lines += ['<nobr>'+'&gt;= '+str(bucket)+'</nobr>']
                 html_report_lines += ['</font></td>']
-                
+
                 cell_color = get_cell_color (summary_stats[ass_i][bucket], best_val['summary_stats'][bucket], worst_val['summary_stats'][bucket])
                 html_report_lines += ['<td bgcolor="'+cell_color+'" align="right"'+bottom_edge+'>'+'<font color="'+text_color+'" size='+text_fontsize+'>'+str(summary_stats[ass_i][bucket])+'</font></td>']
 
@@ -1427,7 +1401,7 @@ class kb_assembly_compare:
         html_report_str = "\n".join(html_report_lines)
         html_file = 'contig_distribution_report.html'
         html_file_path = os.path.join (html_output_dir, html_file)
-        with open (html_file_path, 'w', 0) as html_handle:
+        with open (html_file_path, 'w') as html_handle:
             html_handle.write(html_report_str)
         try:
             html_upload_ret = dfuClient.file_to_shock({'file_path': html_output_dir,
@@ -1602,11 +1576,11 @@ class kb_assembly_compare:
             accepted_input_types = [set_obj_type, genome_obj_type]
             genome_refs = []
             genome_refs_seen = dict()
-        
+
             for i,input_ref in enumerate(params['input_genome_refs']):
                 # genome obj info
                 try:
-                    [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = range(11)  # object_info tuple
+
                     input_obj_info = wsClient.get_object_info_new ({'objects':[{'ref':input_ref}]})[0]
                     input_obj_type = re.sub ('-[0-9]+\.[0-9]+$', "", input_obj_info[TYPE_I])  # remove trailing version
 
@@ -1633,9 +1607,9 @@ class kb_assembly_compare:
                     data = objects[0]['data']
                     info = objects[0]['info']
                     set_obj = data
-                        
+
                     # get Genome items from Genome Set
-                    for genome_id in set_obj['elements'].keys().sort():
+                    for genome_id in sorted(set_obj['elements'].keys()):
                         genome_ref = set_obj['elements'][genome_id]['ref']
                         try:
                             genome_seen = genome_refs_seen[genome_ref]
@@ -1651,11 +1625,11 @@ class kb_assembly_compare:
             genome_obj_names = []
             genome_sci_names = []
             genome_assembly_refs = []
-            
+
             for i,input_ref in enumerate(genome_refs):
                 # genome obj data
                 try:
-                    [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = range(11)  # object_info tuple
+
                     objects = wsClient.get_objects2({'objects':[{'ref':input_ref}]})['data']
                     genome_obj = objects[0]['data']
                     genome_obj_info = objects[0]['info']
@@ -1707,11 +1681,10 @@ class kb_assembly_compare:
             accepted_input_types = [set_obj_type] + assembly_obj_types
             assembly_refs = []
             assembly_refs_seen = dict()
-        
+
             for i,input_ref in enumerate(params['input_assembly_refs']):
                 # assembly obj info
                 try:
-                    [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = range(11)  # object_info tuple
                     input_obj_info = wsClient.get_object_info_new ({'objects':[{'ref':input_ref}]})[0]
                     input_obj_type = re.sub ('-[0-9]+\.[0-9]+$', "", input_obj_info[TYPE_I])  # remove trailing version
 
@@ -1740,7 +1713,7 @@ class kb_assembly_compare:
                         assemblySet_obj = setAPI_Client.get_assembly_set_v1 ({'ref':input_ref, 'include_item_info':1})
                     except Exception as e:
                         raise ValueError('Unable to get object from workspace: (' + input_ref +')' + str(e))
-                    
+
                     for assembly_obj in assemblySet_obj['data']['items']:
                         this_assembly_ref = assembly_obj['ref']
                         try:
