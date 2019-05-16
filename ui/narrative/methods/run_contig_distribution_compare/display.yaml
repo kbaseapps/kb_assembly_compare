@@ -3,10 +3,9 @@
 #
 name: Compare Assembled Contig Distributions - v1.1.2
 tooltip: |
-    View distributions of contig characteristics for different assemblies
+    View distributions of contig characteristics for different assemblies.
 screenshots:
-    - compare_assembled_contig_dist_input_cell.png
-    - compare_assembled_contig_dist_output_report.png
+    []
 
 icon: kb-blue.png
 
@@ -31,29 +30,45 @@ suggestions:
 parameters :
     input_assembly_refs:
         ui-name : |
-            Assembly(s) or AssemblySet(s) <font color=red>*</font>
+            Assembly(s) or AssemblySet(s)<font color=red>*</font>
         short-hint : |
-            Assemblies for comparing contig length distributions
+            Assembly(s) or AssemblySet(s) for comparing contig length distributions.
 
 description : |
-    <p>Compare Assembled Contig Distributions allows the user to gain a picture of the sizes of the assembled contigs from different assembly runs.  Longer contigs are typically better, so the plots chosen for the comparisons reflect that, emphasizing the contribution of longer contigs.  The plots and the colored table are essentially identical to the source of their inspiration, QUAST, although QUAST is not actually run, rather the values are computed by this App.  This App also has a vertical table layout of the assemblies, and additionally offers histograms of the contig lengths, broken up into length regimes to allow for more visible differences in the longer regimes with fewer counts.</p>
+    <p>Compare Assembled Contig Distributions allows the user to do a side-by-side comparison of assemblies in terms of their lengths and size distribution of the component contigs.  Length and distribution are important because longer contigs are typically more desirable. The output contains several plots which were chosen because they emphasize the contribution of longer contigs. The plots and the colored table are essentially identical to the source of their inspiration: QUAST. Although QUAST is not actually run, instead the values are computed by this App. This App also has a vertical table layout of the assemblies, and additionally offers histograms of the contig lengths, broken up into length regimes to allow for more visible differences in the longer regimes with fewer counts.</p>
 
-    <p><hr></p>
-    <p><i>Designed and Implemented for KBase by <a href="mailto:DCChivian@lbl.gov">Dylan Chivian (DCChivian@lbl.gov)</a></i></p>
-    <p><hr></p>
-    <p><b>Configuration:</b></p>
-    <p><b><i>Assembly Object(s):</i></b> The Assembly object(s) is a collection of assembled genome fragments, called "contigs".  Their length distributions usually differ depending on the input sequence data, the assembler, and the parameterization of the assembler.  These comparisons are meant to aid the user in selecting which assembly might be best for their purposes downstream, such as for extracting genomes from a metagenome.  This App may be run on a single Assembly, but is really meant for comparing multiple assemblies that may be provided one-by-one or as an Assembly Set.</p>
-    <p><hr></p>
-    <p><b>Output:</b></p>
+    <p><b>Inputs:</b></p>
+    <p><b><i>Assembly Object(s):</i></b> The Assembly object is a collection of assembled genome fragments, called "contigs".  Most commonly, assembly objects can be created through the use of one of the many assembly Apps being run on reads, but they can also be imported as fasta, or as part of a GenBank genome. The contig length distributions usually differ depending on the input sequence data, the assembler, and the parameterization of the assembler. These comparisons are meant to aid the user in selecting an assembly that might be best for their downstream purposes, such as for extracting genomes from a metagenome. This App may be run on a single Assembly, but is really meant for comparing multiple assemblies that may be provided one-by-one or as a group in one or more AssemblySet objects. This tool can be an effective way to see what assembler works best for the user’s data.</p>
+
+    <p><b>Outputs:</b></p>
     <p><b><i>Output Object:</i></b> This App does not create an output object.</p>
     <p><b><i>Output Report:</i></b>
-    <ul>
-    <li> The report includes two plots at the top.  The first plot reports the cumulative sum on the y-axis of the sorted contig lengths where the contigs are sorted with the longest first.  The second plot again offers the sum of the sorted contigs, this time on the x-axis, with the y-axis reporting the length of each contig.  This plot is similar to the Nx plot available from QUAST but uses the summed length instead of % of contigs as the x-coordinate.
-    <li> Various attributes such as N50, longest contig, number of contigs >= a given length, the sum of the contig lengths for contigs over that length cutoff, etc. are offered in a table, akin the the QUAST table, but with a vertical layout.  The categories in the table are colored from blue (BEST) to red (WORST) for each category.
-    <li> A histogram of the contig lengths in three length regimes are offered, with axes scaled to match those of the other assemblies within that regime, so that visual comparison is simplified.  The three regimes are up to 10 Kbp, between 10 Kbp and 100 Kbp, and above 100 Kbp.
-    </ul>
-    </p>
+      <ul>
+        <li>The top of the report has two plots comparing the assemblies by cumulative sum of contig lengths.
+          <ul>
+            <li>The first plot reports the cumulative sum on the y-axis with the sorted contig lengths on the x-axis. The contigs are sorted from the longest to the shortest and the scale is the percent of contigs represented.</li>
+            <li>The second plot again offers a cumulative sum. This time, the cumulative sum is on the x-axis while the y-axis reports the contig lengths (instead of percent of contigs). This plot is similar to the Nx plot available from QUAST but uses the summed length instead of percent of contigs as the x-coordinate.</li>
+          </ul></li>
+        <li>Below the two plots is a table of information on each Assembly. The categories in the table are colored from blue (BEST) to red (WORST) for each category across the participating Assembly objects. The columns in the table below are as follows:
+          <ul>
+            <li><b>ASSEMBLY:</b> There is one entry for this for each participating assembly object.</li>
+            <li><b><a href="https://en.wikipedia.org/wiki/N50,_L50,_and_related_statistics#N50”>Nx</a> (<a href="https://en.wikipedia.org/wiki/N50,_L50,_and_related_statistics#L50”>Lx</a>): </b>For further details please see the following <a href=”https://en.wikipedia.org/wiki/N50,_L50,_and_related_statistics#Examples">example</a>.</li>
+            <li>The next 3 columns are meant to be read as a group:
+              <ul>
+                <li><b>LENGTH(bp):</b> Contig length threshold</li>
+                <li><b>NUM CONTIGS:</b> Number of contigs that are >= to the threshold length</li>
+                <li><b>SUM LENGTH (bp):</b> Running sum of all bp length of all contigs that are >= to the threshold length</li>
+              </ul></li>
+            <li><b>Contig Length Histogram (1bp <= len < 10Kbp) :</b> Displays contig length distributions of short contigs (under 10Kbp)</li>
+            <li><b>Contig Length Histogram (10Kbp <= len < 100Kbp) :</b> Displays contig length distributions of medium length contigs (10Kbp to 100Kbp)</li>
+            <li><b>Contig Length Histogram (len >= 100Kbp) :</b> Displays contig length distributions of long length contigs (greater than 100Kbp)</li>
+          </ul></li>
+        </ul></p>
+
+    <p><b>Links:</b></p>
     <p><b><i>Downloadable files:</i></b> All the plots from this App are available for download in both PNG image and PDF document formats.  The HTML report may be saved using the browser.</p>
+
+    <p><strong>Team members who developed &amp; deployed App in KBase:</strong> Dylan Chivian. For questions, please <a href=”http://kbase.us/contact-us/”>contact us</a>.</p>
 
 publications :
     -
