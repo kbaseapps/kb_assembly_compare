@@ -30,7 +30,7 @@ suggestions:
 parameters :
     input_assembly_refs:
         ui-name : |
-            Assembly(s) or AssemblySet(s)<font color=red>*</font>
+            Assembly(s) or AssemblySet(s)
         short-hint : |
             Assembly(s) or AssemblySet(s) for comparing contig length distributions.
 
@@ -52,7 +52,7 @@ description : |
         <li>Below the two plots is a table of information on each Assembly. The categories in the table are colored from blue (BEST) to red (WORST) for each category across the participating Assembly objects. The columns in the table below are as follows:
           <ul>
             <li><b>ASSEMBLY:</b> There is one entry for this for each participating assembly object.</li>
-            <li><b><a href="https://en.wikipedia.org/wiki/N50,_L50,_and_related_statistics#N50”>Nx</a> (<a href="https://en.wikipedia.org/wiki/N50,_L50,_and_related_statistics#L50”>Lx</a>): </b>For further details please see the following <a href=”https://en.wikipedia.org/wiki/N50,_L50,_and_related_statistics#Examples">example</a>.</li>
+            <li><b><a href="https://en.wikipedia.org/wiki/N50,_L50,_and_related_statistics#N50">Nx</a>/<a href="https://en.wikipedia.org/wiki/N50,_L50,_and_related_statistics#L50”>Lx</a>:</b> For further details please see the following <a href=”https://en.wikipedia.org/wiki/N50,_L50,_and_related_statistics#Examples">example</a>.</li>
             <li>The next 3 columns are meant to be read as a group:
               <ul>
                 <li><b>LENGTH(bp):</b> Contig length threshold</li>
