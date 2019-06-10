@@ -49,7 +49,7 @@ description : |
 
     <p>A typical protein domain is 80-200 amino acids for all alpha or all beta proteins, whereas alpha+beta and alpha/beta proteins are typically 150-400 amino acids per domain, therefore an absolute minimum length if a perfectly aligned contig is to fit a protein domain should be 300 bp.  Multi-domain proteins, which are typical, should be at least 1000 bp (again, getting lucky and aligning perfectly so the contig doesn't truncate the gene). Therefore, it would be quite reasonable to at least filter contigs to 2 Kbp (which is our default) or higher if you are trying to get more than one protein per contig.  If proteins are your target, you should certainly not go below 300 bp.</p>
 
-    <p><h3>Configuration:</>h3</p>
+    <p><h3>Configuration:</h3></p>
     <p><b><i>Assembly Object(s):</i></b> The Assembly object is a collection of assembled genome fragments, called "contigs". Their length distributions usually differ depending on the input sequence data, the assembler, and the parameterization of the assembler. This App may be run on a single Assembly, several Assemblies, or an AssemblySet object containing multiple Assemblies.</p>
 
     <p><h3>Output:</h3></p>
