@@ -29,17 +29,17 @@ suggestions:
 parameters :
     desc:
         ui-name : |
-            Description of Benchmark <font color=red>*</font>
+            Description of Benchmark
         short-hint : |
             Used to title report
     input_genome_refs:
         ui-name : |
-            Genome(s) or GenomeSet(s) <font color=red>*</font>
+            Genome(s) or GenomeSet(s)
         short-hint : |
             Genomes to use as benchmark
     input_assembly_refs:
         ui-name : |
-            Assembly(s) or AssemblySet(s) <font color=red>*</font>
+            Assembly(s) or AssemblySet(s)
         short-hint : |
             Genomes to use as benchmark
 
