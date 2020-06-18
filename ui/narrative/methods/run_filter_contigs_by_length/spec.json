@@ -5,7 +5,7 @@
     ],
     "contact": "http://kbase.us/contact-us/",
     "visible": true,
-    "categories": ["active","util","assembly"],
+    "categories": ["inactive","util","assembly"],
     "widgets": {
         "input": null,
         "output": "no-display"

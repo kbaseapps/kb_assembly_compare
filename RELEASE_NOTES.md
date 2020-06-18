@@ -1,3 +1,8 @@
+### Version 1.1.6
+__Changes__
+- Removed filter_contigs_by_length() (moved to kb_AssemblyUtilities)
+- fixed bad font asterisk
+
 ### Version 1.1.5
 __Changes__
 - Update to Python 3
