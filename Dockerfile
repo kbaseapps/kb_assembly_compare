@@ -1,4 +1,4 @@
-FROM kbase/kbase:sdkbase2.latest
+FROM kbase/sdkbase2:python
 MAINTAINER KBase Developer
 # -----------------------------------------
 # In this section, you can install any system dependencies required
@@ -12,11 +12,10 @@ RUN apt-get update
 RUN apt-get update && apt-get install -y build-essential wget make curl unzip python && \
     apt-get install -y r-base r-cran-gplots
 
-# Install pandas
-#RUN pip install pandas
-
 # Install X spoof execution wrapper (for plotting)
 RUN apt-get -y install xvfb
+
+RUN pip install matplotlib
 
 # -----------------------------------------
 

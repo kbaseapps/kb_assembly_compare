@@ -3,7 +3,7 @@
 #
 name: Filter Assembled Contigs by Length - v1.1.2
 tooltip: |
-    Extract longer contigs
+    Allows users to extract the longer contigs from Assembly objects.
 
 screenshots: []
 
@@ -22,7 +22,7 @@ suggestions:
         related:
             []
         next:
-            []
+            [fast_ani, align_reads_using_bowtie2, align_reads_using_hisat2, align_reads_using_tophat2, annotate_contigs, annotate_contigsets, run_maxbin2,run_metabat,  run_QUAST_app, run_checkM_lineage_wf, run_contig_distribution_compare, assembly_metadata_report]
 
 #
 # Configure the display and description of parameters
@@ -30,39 +30,39 @@ suggestions:
 parameters :
     input_assembly_refs:
         ui-name : |
-            Assembly(s) or AssemblySet(s) <font color=red>*</font>
+            Assembly(s) or AssemblySet(s)
         short-hint : |
-            Assemblies for comparing contig length distributions
+            Assembly(s) or AssemblySet(s) to have their contigs filtered.
     min_contig_length:
         ui-name : |
-            Min Contig Length <font color=red>*</font>
+            Min Contig Length
         short-hint : |
-            Set the length threshold that all assembled contigs must meet or exceed
+            Set the length threshold that all assembled contigs must meet or exceed.
     output_name:
         ui-name : |
-            Output name <font color=red>*</font>
+            Output name
         short-hint : |
-            Name the filtered Assembly output object (or AssemblySet for multiple Assembly inputs)
+            Name the filtered Assembly output object (or AssemblySet object for multiple Assembly inputs). If more than one Assembly or AssemblySet is entered, each individual Assembly that is filtered will create a new assembly object with the original_assembly_name with “.min_contig_length<b>X</b>bp” appended to the end (where <b>X</b> is the entered Min Contig Length entered by the user).
 
 description : |
-    <p>Filter Assembled Contigs by Length allows the user remove shorter contigs from their Assembly objects.  This allows methods that analyze assemblies to run much faster on the most valuable contigs where genes are not truncated and genome context is available for longer contigs with multiple genes.</p>
-    <p>A typical protein domain is 80-200 amino acids for all alpha or all beta proteins, whereas alpha+beta and alpha/beta proteins are typically 150-400 amino acids per domain, therefore an absolute minimum length if a perfectly aligned contig is to fit a protein domain should be 300 bp.  Multi-domain proteins, which are typical, should be at least 1000 bp (again, getting lucky and aligning perfectly so the contig doesn't truncate the gene).  Therefore, it would be quite reasonable to at least filter contigs to 2 Kbp (which is our default) or higher if you are trying to get more than one protein per contig.  If proteins are your target, you should certainly not go below 300 bp.</p>
+    <p>Filter Assembled Contigs by Length allows users to remove shorter contigs from their Assembly objects. This allows Apps that analyze assemblies to run much faster on the most valuable contigs where genes are not truncated and genome context is available for longer contigs with multiple genes. Certain Apps like Prokka and MaxBin2 are particularly susceptible to performance issues when overloaded with a high number of contigs, so any effort to remove low-value short contigs will increase performance time and success rate.</p>
 
-    <p><hr></p>
-    <p><i>Designed and Implemented for KBase by <a href="mailto:DCChivian@lbl.gov">Dylan Chivian (DCChivian@lbl.gov)</a></i></p>
-    <p><hr></p>
-    <p><b>Configuration:</b></p>
-    <p><b><i>Assembly Object(s):</i></b> The Assembly object(s) is a collection of assembled genome fragments, called "contigs".  Their length distributions usually differ depending on the input sequence data, the assembler, and the parameterization of the assembler.  This App may be run on a single Assembly, several Assemblies, or an AssemblySet object containing multiple Assemblies.</p>
-    <p><hr></p>
-    <p><b>Output:</b></p>
-    <p><b><i>Output Object:</i></b>
-    <p><b><i>Output Object:</i></b> The Output object will be an Assembly Object for each input Assembly.  Additionally, if more than one Assembly is input, then the output will also include an AssemblySet object that contains the output Assembly object..</p>
+    <p>A typical protein domain is 80-200 amino acids for all alpha or all beta proteins, whereas alpha+beta and alpha/beta proteins are typically 150-400 amino acids per domain, therefore an absolute minimum length if a perfectly aligned contig is to fit a protein domain should be 300 bp.  Multi-domain proteins, which are typical, should be at least 1000 bp (again, getting lucky and aligning perfectly so the contig doesn't truncate the gene). Therefore, it would be quite reasonable to at least filter contigs to 2 Kbp (which is our default) or higher if you are trying to get more than one protein per contig.  If proteins are your target, you should certainly not go below 300 bp.</p>
+
+    <p><h3>Configuration:</h3></p>
+    <p><b><i>Assembly Object(s):</i></b> The Assembly object is a collection of assembled genome fragments, called "contigs". Their length distributions usually differ depending on the input sequence data, the assembler, and the parameterization of the assembler. This App may be run on a single Assembly, several Assemblies, or an AssemblySet object containing multiple Assemblies.</p>
+
+    <p><h3>Output:</h3></p>
+    <p><b><i>Output Object:</i></b> The output object will be an Assembly object for each input Assembly. Additionally, if more than one Assembly is input, then the output will also include an AssemblySet object that contains the output Assembly object. If more than one Assembly or AssemblySet is entered, each individual assembly that is filtered will create a new Assembly object with the original_assembly_name with “.min_contig_length<b>X</b>bp” appended to the end (where <b>X</b> is the entered Min Contig Length entered by the user).</p>
+
     <p><b><i>Output Report:</i></b>
-    <ul>
-    <li> The report indicates how many contigs were filtered for each Assembly.
-    </ul>
+      <ul>
+        <li>The report indicates how many contigs were filtered for each Assembly.</li>
+      </ul>
     </p>
-    <p><b><i>Downloadable files:</i></b> The Assembly objects can be accessed in the Data Pane for download as FASTA.</p>
+    <p><b><i>Downloadable files:</i></b> The Assembly objects can be accessed in the Data Panel for download in FASTA format.</p>
+
+    <p><strong>Team members who developed &amp; deployed algorithm in KBase:</strong> Dylan Chivian. For questions, please <a href=”http://kbase.us/contact-us/”>contact us</a>.</p>
 
 publications :
     -
